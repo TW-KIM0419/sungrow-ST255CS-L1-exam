@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ST255CS-2H 儲能系統 L1 技術人員認證考核系統</title>
     <style>
         :root {
@@ -21,21 +21,25 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            user-select: none; /* 禁止反白防複製 */
-            font-family: "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
         }
 
         body {
             background-color: var(--bg);
             color: var(--text);
             line-height: 1.6;
-            padding-bottom: 50px;
+            padding-bottom: 60px;
         }
 
         header {
             background-color: var(--secondary);
             color: #ffffff;
-            padding: 16px 0;
+            padding: 14px 0;
             border-bottom: 4px solid var(--primary);
             position: sticky;
             top: 0;
@@ -45,58 +49,78 @@
         .header-content {
             max-width: 1100px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
+        }
+
+        .header-title h2 {
+            font-size: 1.15rem;
+            line-height: 1.3;
+        }
+
+        .header-title p {
+            font-size: 0.75rem;
+            color: #bdc3c7;
+        }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
         .status-badge {
             background-color: var(--primary);
-            padding: 6px 16px;
+            padding: 6px 12px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
+            white-space: nowrap;
         }
 
         .warning-badge {
             background-color: var(--danger);
             color: white;
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 4px;
-            font-size: 0.85rem;
-            margin-left: 10px;
+            font-size: 0.75rem;
+            white-space: nowrap;
             display: none;
         }
 
         .main-container {
             max-width: 1100px;
-            margin: 25px auto;
-            padding: 0 20px;
+            margin: 15px auto;
+            padding: 0 16px;
             display: flex;
-            gap: 25px;
+            gap: 20px;
             align-items: flex-start;
         }
 
         .exam-area {
             flex: 1;
+            width: 100%;
         }
 
         .sidebar {
-            width: 290px;
+            width: 280px;
             background: var(--card-bg);
             border-radius: 8px;
-            padding: 20px;
+            padding: 16px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             position: sticky;
-            top: 90px;
+            top: 80px;
         }
 
         .card {
             background: var(--card-bg);
             border-radius: 8px;
-            padding: 22px;
-            margin-bottom: 20px;
+            padding: 18px;
+            margin-bottom: 16px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             border-left: 5px solid var(--border);
         }
@@ -108,17 +132,18 @@
         .card-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 0.85rem;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
             font-weight: bold;
             color: #7f8c8d;
         }
 
         .question-text {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 14px;
             color: #2c3e50;
+            line-height: 1.5;
         }
 
         .options-group {
@@ -130,12 +155,14 @@
         .option-label {
             display: flex;
             align-items: center;
-            padding: 12px 15px;
+            padding: 12px 14px;
             background: #fbfcfd;
             border: 1px solid var(--border);
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 0.95rem;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .option-label:hover {
@@ -144,14 +171,17 @@
 
         .option-label input {
             margin-right: 12px;
+            width: 18px;
+            height: 18px;
             accent-color: var(--primary);
+            flex-shrink: 0;
         }
 
         .grid-nav {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin: 15px 0;
+            gap: 6px;
+            margin: 12px 0;
         }
 
         .nav-btn {
@@ -162,6 +192,7 @@
             cursor: pointer;
             font-weight: bold;
             font-size: 0.85rem;
+            color: #333;
         }
 
         .nav-btn.answered {
@@ -181,6 +212,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn:hover {
@@ -188,15 +220,15 @@
         }
 
         .form-group {
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             text-align: left;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .form-group input {
@@ -205,9 +237,10 @@
             border: 1px solid var(--border);
             border-radius: 5px;
             font-size: 0.95rem;
+            user-select: text;
+            -webkit-user-select: text;
         }
 
-        /* 模態彈窗 */
         .modal {
             display: none;
             position: fixed;
@@ -219,16 +252,19 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            padding: 16px;
         }
 
         .modal-box {
             background: white;
             border-radius: 10px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
+            padding: 24px;
+            max-width: 480px;
+            width: 100%;
             text-align: center;
             box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         #lock-screen {
@@ -245,38 +281,51 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 20px;
+            padding: 24px;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 820px) {
             .main-container {
-                flex-direction: column;
+                flex-direction: column-reverse;
             }
             .sidebar {
                 width: 100%;
                 position: static;
+                margin-bottom: 10px;
+            }
+            .grid-nav {
+                grid-template-columns: repeat(10, 1fr);
+            }
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .status-container {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 6px;
             }
         }
     </style>
 </head>
-<body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
+<body>
 
-<!-- 作弊鎖定警告螢幕 -->
+<!-- 鎖定螢幕 -->
 <div id="lock-screen">
-    <h1 style="font-size: 2.5rem; margin-bottom: 15px;">⚠️ 測驗已被強制終止</h1>
-    <p style="font-size: 1.2rem; max-width: 600px; margin-bottom: 25px;">
-        系統偵測到您切換分頁或離開測驗視窗次數已達上限（3 次）。為維持認證公平性，試卷已自動封鎖並提交現有作答紀錄，本次成績將記錄違規。
+    <h1 style="font-size: 2rem; margin-bottom: 15px;">⚠️ 測驗已被強制終止</h1>
+    <p style="font-size: 1.05rem; max-width: 500px; margin-bottom: 20px; line-height: 1.5;">
+        系統偵測到您切換分頁或離開測驗視窗已達 3 次。為維持認證公平性，試卷已自動封鎖並提交作答紀錄。
     </p>
 </div>
 
 <header>
     <div class="header-content">
-        <div>
-            <h2>ST255CS-2H 儲能系統 L1 原廠認證測驗</h2>
-            <p style="font-size: 0.8rem; color: #bdc3c7;">防作弊受控環境 ｜ 80 分及格 ｜ 成績自動直傳原廠系統</p>
+        <div class="header-title">
+            <h2>ST255CS-2H 儲能系統 L1 認證測驗</h2>
+            <p>原廠線上測驗系統 ｜ 80 分及格 ｜ 成績自動上傳</p>
         </div>
-        <div style="display: flex; align-items: center;">
-            <div class="status-badge">剩餘時間：<span id="time-display">40:00</span></div>
+        <div class="status-container">
+            <div class="status-badge">時間：<span id="time-display">40:00</span></div>
             <div class="warning-badge" id="warn-display">切屏警告：0 / 3</div>
         </div>
     </div>
@@ -285,71 +334,71 @@
 <!-- 考生資料登錄彈窗 -->
 <div id="candidate-modal" class="modal" style="display: flex;">
     <div class="modal-box">
-        <h3 style="color: var(--secondary); margin-bottom: 8px;">考生身分核對登錄</h3>
-        <p style="font-size: 0.85rem; color: #7f8c8d; margin-bottom: 20px;">
-            本測驗受防作弊協定保護。測驗期間**嚴禁切換分頁、離開視窗或開啟開發者工具**，違者將自動終止並計為不及格。
+        <h3 style="color: var(--secondary); margin-bottom: 6px;">考生認證資料登錄</h3>
+        <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 16px;">
+            本測驗受防作弊保護。測驗期間**嚴禁切換分頁或開啟其他應用程式**，切換達 3 次將自動強制交卷。
         </p>
         
         <div class="form-group">
-            <label>中文姓名 <span style="color:red;">*</span></label>
-            <input type="text" id="cand-name" placeholder="請輸入中文全名" required>
+            <label>中文全名 <span style="color:red;">*</span></label>
+            <input type="text" id="cand-name" placeholder="請輸入姓名" required>
         </div>
         <div class="form-group">
-            <label>所屬事業單位 / 公司 <span style="color:red;">*</span></label>
-            <input type="text" id="cand-company" placeholder="例如：友達光電 / 泓德能源 / 維運協力商" required>
+            <label>公司 / 所屬單位名稱 <span style="color:red;">*</span></label>
+            <input type="text" id="cand-company" placeholder="例如：友達光電 / 泓德能源 / 維運服務商" required>
         </div>
         <div class="form-group">
             <label>部門 / 職稱 <span style="color:red;">*</span></label>
-            <input type="text" id="cand-title" placeholder="例如：電氣技術員 / 現場維運工程師" required>
+            <input type="text" id="cand-title" placeholder="例如：現場工程師 / 維運技術員" required>
         </div>
         <div class="form-group">
             <label>手機聯絡電話 <span style="color:red;">*</span></label>
             <input type="tel" id="cand-phone" placeholder="09xxxxxxxx" required>
         </div>
         <div class="form-group">
-            <label>電子信箱 (證書核發通知) <span style="color:red;">*</span></label>
+            <label>電子信箱 (證書核發寄送) <span style="color:red;">*</span></label>
             <input type="email" id="cand-email" placeholder="name@company.com" required>
         </div>
         
-        <button class="btn" onclick="startSecureExam()">同意防作弊規範並進入全螢幕測驗</button>
+        <button class="btn" style="margin-top: 6px;" onclick="startSecureExam()">確認資料並開始測驗</button>
     </div>
 </div>
 
 <div class="main-container">
     <div class="exam-area" id="quiz-container">
-        <!-- 亂序生成考題 -->
+        <!-- 考題渲染區 -->
     </div>
 
     <aside class="sidebar">
-        <div style="margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-            <div style="font-size: 0.8rem; color: #7f8c8d;">應試工程師</div>
-            <strong id="display-name" style="font-size: 1.05rem; color: var(--secondary);">-</strong>
-            <div id="display-comp" style="font-size: 0.8rem; color: #95a5a6;">-</div>
+        <div style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+            <div style="font-size: 0.75rem; color: #7f8c8d;">應試人員</div>
+            <strong id="display-name" style="font-size: 1rem; color: var(--secondary);">-</strong>
+            <div id="display-comp" style="font-size: 0.75rem; color: #95a5a6;">-</div>
         </div>
-        <h4>題號導航</h4>
+        <h4 style="font-size: 0.9rem;">試題導航</h4>
         <div class="grid-nav" id="grid-nav"></div>
-        <button class="btn" onclick="confirmSubmit()">完成並傳送評分結果</button>
+        <button class="btn" onclick="confirmSubmit()">繳交試卷並送出成績</button>
     </aside>
 </div>
 
 <!-- 提交完成提示彈窗 -->
 <div id="finish-modal" class="modal">
     <div class="modal-box">
-        <h2 id="finish-status-title" style="color: var(--secondary);">試卷已成功上傳</h2>
-        <p id="finish-msg" style="margin: 20px 0; font-size: 0.95rem; color: #555;">
-            您的考核成果與基本資訊已加密回傳至原廠核發系統。考核通過名單將直接建檔於認證資料庫並進行證書核發作業。
+        <h2 id="finish-status-title" style="color: var(--secondary);">試卷已完成提交</h2>
+        <p id="finish-msg" style="margin: 16px 0; font-size: 0.9rem; color: #555; line-height: 1.5;">
+            您的測驗成績已加密直傳至原廠資料庫。審核通過者將直接建檔並排程核發 L1 認證證書。
         </p>
-        <p style="font-size: 0.85rem; color: #95a5a6;">為維護原廠題庫安全，考生端不提供考題答案檢視，請關閉本頁面即可。</p>
+        <p style="font-size: 0.8rem; color: #95a5a6;">請直接關閉此頁面即可。</p>
     </div>
 </div>
 
 <script>
 // ==========================================
-// 核心設定：請貼入您的 Google Web App 部署網址
+// 部署之 Google Apps Script Web App 網址
 // ==========================================
 const DISPATCH_API_URL = "https://script.google.com/macros/s/AKfycbyA72KTEs3uqbb0NuoxqmmFtn0PhqMRxjY6ypGZi-1mIV2JZCw6RQlG9FNW0mU8-f_9/exec";
 
-// 原始題庫（內部標準題庫，不直接暴露正解代碼給考生）
+// 原始題庫
 const rawQuestionBank = [
     {
         category: "系統架構",
@@ -415,287 +464,4 @@ const rawQuestionBank = [
         category: "機械與電氣連接",
         q: "連接電池模組（PACK）之間的直流高壓動力線航空插頭時，如何確認已正確插緊到位？",
         correctText: "推入到底時會發出清脆的「咔噠」聲並確實鎖固到位",
-        wrongTexts: ["使用大力拉扯確認不會脫落即可", "塗抹大量黃油至完全溢出", "使用鐵鎚輕輕敲擊外殼"]
-    },
-    {
-        category: "機械與電氣連接",
-        q: "交流主電源配線若採用鋁合金線纜連接至銅端子排時，為避免電化學腐蝕，應採取何種措施？",
-        correctText: "嚴禁鋁端子直接接觸銅端子排，必須使用銅鋁過渡端子或銅鋁過渡墊片",
-        wrongTexts: ["直接將鋁裸端子以大扭力鎖在銅排上", "在鋁端子上纏繞絕緣膠帶後鎖緊", "將銅排鍍層磨除後直接連接"]
-    },
-    {
-        category: "機械與電氣連接",
-        q: "儲能櫃外部保護接地（PE）端子使用螺栓緊固後，為防止接地點日後氧化生鏽，應採取何種防護？",
-        correctText: "對接地點整體表面進行防腐防鏽處理（如噴塗專用防腐漆）",
-        wrongTexts: ["浸泡於清水中冷卻", "每天使用砂紙重新打磨", "接地為自然金屬，無需任何後續處置"]
-    },
-    {
-        category: "施工防護",
-        q: "儲能櫃底部完成全部線纜配線後，為防止鼠類進入咬壞線路並阻隔濕氣，穿線孔應使用何種材料封堵？",
-        correctText: "防火泥（耐火泥）或專用密封膠材料確實嚴密封堵",
-        wrongTexts: ["一般廢棄紙箱碎屑", "普通塑膠袋塞入", "報紙團"]
-    },
-    {
-        category: "施工驗收",
-        q: "儲能櫃出廠時貼於進風口、出風口與門鎖上的 3M 保護貼膜，應於何時將其全部撕除？",
-        correctText: "設備於現地完成固定安裝後、正式通電運轉前務必完全移除",
-        wrongTexts: ["在工廠裝卸上車時立刻撕除", "永遠保留貼膜以防止外部灰塵進入", "商業運轉三年後例行保養時再撕除"]
-    },
-    {
-        category: "上電作業",
-        q: "現地進行標準通電開機作業時，配電盒（BSP）內部的硬體開關切換順序何者正確？",
-        correctText: "先閉合交流主開關（QF1） → 閉合交流輔助開關（Q1）與 UPS 開關（Q2） → 啟動 UPS → 軟體開機",
-        wrongTexts: ["先關閉 UPS → 閉合 QF1 → 軟體開機", "直接按下急停按鈕開機", "拔除全部控制線纜後直接合閘"]
-    },
-    {
-        category: "通訊配置",
-        q: "使用筆記型電腦透過乙太網路線直連本地控制器（LC300）進行設定時，LC300 預設的登入 IP 位址通常為何？",
-        correctText: "192.168.13.100（或 192.168.1.100）",
-        wrongTexts: ["10.0.0.1", "192.168.1.1", "255.255.255.0"]
-    },
-    {
-        category: "運維保養",
-        q: "儲能系統於案場長期停機維護期間，若發現任意電池簇電量（SOC）降為 0%，維運人員應如何處理？",
-        correctText: "必須在 120 小時內將 SOC 充電補電至 15% 以上，防止電芯因深度過放造成不可逆損壞",
-        wrongTexts: ["放任不管，等待數個月後再觀察", "立即向電池艙直接注水冷卻", "立即將全櫃電池模組判定報廢更換"]
-    },
-    {
-        category: "安全防護",
-        q: "ST255CS-2H 櫃內配置的火災探測系統中，「複合型探測器」主要負責連續監控櫃內的哪些物理參數？",
-        correctText: "溫度、一氧化碳（CO）濃度與煙霧濃度",
-        wrongTexts: ["僅監測風速與風向", "僅監測交流電壓大小", "僅監測地基震動頻率"]
-    },
-    {
-        category: "例行保養",
-        q: "清潔儲能櫃內部灰塵與散熱風道濾網時，下列哪一種做法是正確且符合安全規範的？",
-        correctText: "切斷電源並驗電確認後，使用工業吸塵器或乾燥柔軟抹布清理，嚴禁用水沖洗內部電氣零組件",
-        wrongTexts: ["使用高壓水槍直接沖洗機櫃內部與電氣元件", "運轉帶電中直接以濕布擦拭高壓母排", "使用強酸或高腐蝕性清潔劑刷洗電路板"]
-    }
-];
-
-let randomizedExam = [];
-let userSelections = {};
-let candidateInfo = {};
-let timerInterval = null;
-let remainingSeconds = 40 * 60;
-let tabSwitchCount = 0;
-const MAX_TAB_SWITCH = 3;
-let isExamSubmitted = false;
-
-// 防作弊隨機洗牌演算法
-function shuffleArray(array) {
-    const arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-}
-
-function startSecureExam() {
-    const name = document.getElementById("cand-name").value.trim();
-    const comp = document.getElementById("cand-company").value.trim();
-    const title = document.getElementById("cand-title").value.trim();
-    const phone = document.getElementById("cand-phone").value.trim();
-    const email = document.getElementById("cand-email").value.trim();
-
-    if (!name || !comp || !title || !phone || !email) {
-        alert("所有考生欄位皆為必填，請確實填寫以利原廠核發證書！");
-        return;
-    }
-
-    candidateInfo = { name, comp, title, phone, email };
-    document.getElementById("display-name").innerText = name;
-    document.getElementById("display-comp").innerText = `${comp} · ${title}`;
-    document.getElementById("candidate-modal").style.display = "none";
-
-    // 啟動全螢幕防護
-    if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen().catch(() => {});
-    }
-
-    // 隨機重排題目與選項（Shuffle Engine）
-    const shuffledQuestions = shuffleArray(rawQuestionBank);
-    randomizedExam = shuffledQuestions.map((qItem, idx) => {
-        const allOptions = [
-            { text: qItem.correctText, isCorrect: true },
-            ...qItem.wrongTexts.map(t => ({ text: t, isCorrect: false }))
-        ];
-        const shuffledOptions = shuffleArray(allOptions);
-        return {
-            index: idx,
-            category: qItem.category,
-            question: qItem.q,
-            options: shuffledOptions
-        };
-    });
-
-    renderQuizUI();
-    startExamTimer();
-    initAntiCheatListeners();
-}
-
-function renderQuizUI() {
-    const container = document.getElementById("quiz-container");
-    const gridNav = document.getElementById("grid-nav");
-    container.innerHTML = "";
-    gridNav.innerHTML = "";
-
-    randomizedExam.forEach((item, qIdx) => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.id = `card-${qIdx}`;
-
-        let optsHtml = "";
-        item.options.forEach((opt, optIdx) => {
-            optsHtml += `
-                <label class="option-label" onclick="selectAnswer(${qIdx}, ${optIdx})">
-                    <input type="radio" name="opt_${qIdx}" value="${optIdx}">
-                    <span>${String.fromCharCode(65 + optIdx)}. ${opt.text}</span>
-                </label>
-            `;
-        });
-
-        card.innerHTML = `
-            <div class="card-header">
-                <span>第 ${qIdx + 1} 題 / 共 20 題</span>
-                <span>核心分類：${item.category}</span>
-            </div>
-            <div class="question-text">${item.question}</div>
-            <div class="options-group">${optsHtml}</div>
-        `;
-        container.appendChild(card);
-
-        const navBtn = document.createElement("button");
-        navBtn.className = "nav-btn";
-        navBtn.id = `nav-${qIdx}`;
-        navBtn.innerText = qIdx + 1;
-        navBtn.onclick = () => {
-            document.getElementById(`card-${qIdx}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
-        };
-        gridNav.appendChild(navBtn);
-    });
-}
-
-function selectAnswer(qIdx, optIdx) {
-    userSelections[qIdx] = optIdx;
-    document.getElementById(`nav-${qIdx}`).classList.add("answered");
-    document.getElementById(`card-${qIdx}`).classList.add("active");
-}
-
-function startExamTimer() {
-    timerInterval = setInterval(() => {
-        if (remainingSeconds <= 0) {
-            clearInterval(timerInterval);
-            finalizeAndDispatch("時間到強制交卷");
-            return;
-        }
-        remainingSeconds--;
-        const m = Math.floor(remainingSeconds / 60);
-        const s = remainingSeconds % 60;
-        document.getElementById("time-display").innerText = 
-            `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    }, 1000);
-}
-
-// 防作弊偵測機制
-function initAntiCheatListeners() {
-    // 偵測跳離分頁或視窗失去焦點
-    window.addEventListener("blur", handleTabSwitch);
-
-    // 禁用關鍵快捷鍵 (F12, Ctrl+Shift+I, Ctrl+U)
-    window.addEventListener("keydown", (e) => {
-        if (
-            e.key === "F12" ||
-            (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "C" || e.key === "J")) ||
-            (e.ctrlKey && e.key === "u")
-        ) {
-            e.preventDefault();
-            return false;
-        }
-    });
-}
-
-function handleTabSwitch() {
-    if (isExamSubmitted) return;
-
-    tabSwitchCount++;
-    const warnBadge = document.getElementById("warn-display");
-    warnBadge.style.display = "inline-block";
-    warnBadge.innerText = `切屏警告：${tabSwitchCount} / ${MAX_TAB_SWITCH}`;
-
-    if (tabSwitchCount >= MAX_TAB_SWITCH) {
-        document.getElementById("lock-screen").style.display = "flex";
-        finalizeAndDispatch("違規切換視窗超標 (作弊終止)");
-    } else {
-        alert(`【防作弊警告】偵測到您離開考試畫面！累計違規 ${tabSwitchCount} 次，超過 ${MAX_TAB_SWITCH} 次將強制終止考試並取消資格！`);
-    }
-}
-
-function confirmSubmit() {
-    const total = randomizedExam.length;
-    const answered = Object.keys(userSelections).length;
-
-    if (answered < total) {
-        if (!confirm(`您尚有 ${total - answered} 題未作答，確定要現在提交嗎？提交後將無法修改。`)) {
-            return;
-        }
-    } else {
-        if (!confirm("確定要交卷並傳送成績嗎？")) {
-            return;
-        }
-    }
-
-    finalizeAndDispatch("正常提交");
-}
-
-function finalizeAndDispatch(submitType) {
-    if (isExamSubmitted) return;
-    isExamSubmitted = true;
-    clearInterval(timerInterval);
-    window.removeEventListener("blur", handleTabSwitch);
-
-    // 評分計算（各題對應被隨機重排後的選項屬性）
-    let score = 0;
-    randomizedExam.forEach((item, qIdx) => {
-        const selectedOptIdx = userSelections[qIdx];
-        if (selectedOptIdx !== undefined && item.options[selectedOptIdx].isCorrect) {
-            score += 5;
-        }
-    });
-
-    const isPassed = score >= 80;
-    const payload = {
-        timestamp: new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" }),
-        name: candidateInfo.name,
-        company: candidateInfo.comp,
-        title: candidateInfo.title,
-        phone: candidateInfo.phone,
-        email: candidateInfo.email,
-        score: score,
-        result: isPassed ? "及格 (通過L1認證)" : "未達標準 (不合格)",
-        cheatWarnings: tabSwitchCount,
-        submitType: submitType
-    };
-
-    // 自動非同步傳送至您的 Google Apps Script 後端
-    if (DISPATCH_API_URL && !DISPATCH_API_URL.includes("YOUR-DEPLOYED-URL-HERE")) {
-        fetch(DISPATCH_API_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        }).catch(err => console.error("Dispatch Error:", err));
-    }
-
-    // 顯示最終防作弊完成畫面（不顯示正解，杜絕洩題）
-    document.getElementById("finish-modal").style.display = "flex";
-    if (!isPassed) {
-        document.getElementById("finish-status-title").innerText = "測驗已完成 (未達及格標準)";
-        document.getElementById("finish-status-title").style.color = "var(--danger)";
-    }
-}
-</script>
-
-</body>
-</html>
+        wrongTexts: ["使用大力拉扯確認不會脫落即可", "塗抹大量黃油至完全溢出", "使用鐵
