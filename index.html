@@ -21,11 +21,6 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            -webkit-touch-callout: none;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
         }
 
@@ -34,6 +29,15 @@
             color: var(--text);
             line-height: 1.6;
             padding-bottom: 70px;
+        }
+
+        /* 僅在考題區域禁用反白複製，確保表單與按鈕在全平台正常運作 */
+        .no-copy {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
         }
 
         header {
@@ -160,13 +164,17 @@
             border: 1px solid var(--border);
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.15s, border-color 0.15s;
             font-size: 0.95rem;
-            -webkit-tap-highlight-color: transparent;
         }
 
         .option-label:hover {
             background: #f0f4f8;
+        }
+
+        .option-label.selected {
+            background: #fff5f0;
+            border-color: var(--primary);
         }
 
         .option-label input {
@@ -175,6 +183,7 @@
             height: 18px;
             accent-color: var(--primary);
             flex-shrink: 0;
+            cursor: pointer;
         }
 
         .grid-nav {
@@ -202,6 +211,7 @@
         }
 
         .btn {
+            display: inline-block;
             width: 100%;
             background-color: var(--primary);
             color: white;
@@ -211,12 +221,16 @@
             font-size: 1.05rem;
             font-weight: bold;
             cursor: pointer;
+            text-align: center;
             transition: background 0.2s;
-            -webkit-tap-highlight-color: transparent;
         }
 
         .btn:hover {
             background-color: var(--primary-dark);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
         }
 
         .form-group {
@@ -233,12 +247,26 @@
 
         .form-group input {
             width: 100%;
-            padding: 12px;
+            padding: 11px 12px;
             border: 1px solid var(--border);
             border-radius: 5px;
             font-size: 1rem;
-            user-select: text;
-            -webkit-user-select: text;
+            background: #fff;
+            color: #333;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(241, 90, 36, 0.15);
+        }
+
+        .error-hint {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            display: none;
+            font-weight: bold;
         }
 
         .modal {
@@ -248,7 +276,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -311,22 +339,22 @@
 <body>
 
 <!-- 違規鎖定畫面 -->
-<div id="lock-screen">
+<div id="lock-screen" class="no-copy">
     <h1 style="font-size: 2rem; margin-bottom: 15px;">⚠️ 測驗已被強制終止</h1>
     <p style="font-size: 1.05rem; max-width: 500px; margin-bottom: 20px; line-height: 1.5;">
         系統偵測到您切換分頁或離開測驗視窗已達 3 次。為維持認證公平性，試卷已自動封鎖並提交作答紀錄。
     </p>
 </div>
 
-<header>
+<header class="no-copy">
     <div class="header-content">
         <div class="header-title">
             <h2>ST255CS-2H 儲能系統 L1 認證測驗</h2>
-            <p>原廠線上測驗系統 ｜ 80 分及格 ｜ 成績自動上傳</p>
+            <p>原廠 50 題庫隨機抽 20 題 ｜ 80 分及格 ｜ 成績自動上傳</p>
         </div>
         <div class="status-container">
             <div class="status-badge">時間：<span id="time-display">40:00</span></div>
-            <div class="warning-badge" id="warn-display">切屏警告：0 / 3</div>
+            <div class="warning-badge" id="warn-display">離開畫面：0 / 3</div>
         </div>
     </div>
 </header>
@@ -335,39 +363,40 @@
 <div id="candidate-modal" class="modal" style="display: flex;">
     <div class="modal-box">
         <h3 style="color: var(--secondary); margin-bottom: 6px;">考生認證資料登錄</h3>
-        <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 16px;">
-            本測驗受防作弊保護。測驗期間**嚴禁切換分頁或離開瀏覽器**，離開累計達 3 次將自動強制交卷。
+        <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 14px;">
+            本測驗由 50 題標準題庫隨機抽取 20 題。測驗期間**嚴禁切換分頁或縮小瀏覽器**，違規達 3 次將自動強制交卷。
         </p>
         
+        <div id="form-error" class="error-hint">⚠️ 請完整填寫所有必填欄位！</div>
+
         <div class="form-group">
-            <label>中文全名 <span style="color:red;">*</span></label>
-            <input type="text" id="cand-name" placeholder="請輸入姓名" required>
+            <label for="cand-name">中文全名 <span style="color:red;">*</span></label>
+            <input type="text" id="cand-name" placeholder="請輸入姓名" autocomplete="name">
         </div>
         <div class="form-group">
-            <label>公司 / 所屬單位名稱 <span style="color:red;">*</span></label>
-            <input type="text" id="cand-company" placeholder="例如：友達光電 / 泓德能源 / 維運協力商" required>
+            <label for="cand-company">公司 / 所屬單位名稱 <span style="color:red;">*</span></label>
+            <input type="text" id="cand-company" placeholder="例如：友達光電 / 泓德能源 / 維運協力商" autocomplete="organization">
         </div>
         <div class="form-group">
-            <label>部門 / 職稱 <span style="color:red;">*</span></label>
-            <input type="text" id="cand-title" placeholder="例如：現場工程師 / 維運技術員" required>
+            <label for="cand-title">部門 / 職稱 <span style="color:red;">*</span></label>
+            <input type="text" id="cand-title" placeholder="例如：電氣工程師 / 維運技術員" autocomplete="organization-title">
         </div>
         <div class="form-group">
-            <label>手機聯絡電話 <span style="color:red;">*</span></label>
-            <input type="tel" id="cand-phone" placeholder="09xxxxxxxx" required>
+            <label for="cand-phone">手機聯絡電話 <span style="color:red;">*</span></label>
+            <input type="tel" id="cand-phone" placeholder="09xxxxxxxx" autocomplete="tel">
         </div>
         <div class="form-group">
-            <label>電子信箱 (證書核發通知) <span style="color:red;">*</span></label>
-            <input type="email" id="cand-email" placeholder="name@company.com" required>
+            <label for="cand-email">電子信箱 (證書核發通知) <span style="color:red;">*</span></label>
+            <input type="email" id="cand-email" placeholder="name@company.com" autocomplete="email">
         </div>
         
-        <button type="button" class="btn" style="margin-top: 10px;" id="start-btn" onclick="startSecureExam()">確認資料並開始測驗</button>
+        <button type="button" class="btn" style="margin-top: 10px;" id="btn-start-exam">確認資料並開始測驗</button>
     </div>
 </div>
 
-<div class="main-container">
-    <div class="exam-area" id="quiz-container">
-        <!-- 考題渲染區 -->
-    </div>
+<!-- 主考場區域 -->
+<div class="main-container no-copy" id="exam-main-wrapper" style="display: none;">
+    <div class="exam-area" id="quiz-container"></div>
 
     <aside class="sidebar">
         <div style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
@@ -375,103 +404,699 @@
             <strong id="display-name" style="font-size: 1rem; color: var(--secondary);">-</strong>
             <div id="display-comp" style="font-size: 0.75rem; color: #95a5a6;">-</div>
         </div>
-        <h4 style="font-size: 0.9rem;">試題導航</h4>
+        <h4 style="font-size: 0.9rem;">試題導航 (共 20 題)</h4>
         <div class="grid-nav" id="grid-nav"></div>
-        <button type="button" class="btn" onclick="confirmSubmit()">繳交試卷並送出成績</button>
+        <button type="button" class="btn" id="btn-submit-exam">繳交試卷並送出成績</button>
     </aside>
 </div>
 
 <!-- 提交完成提示彈窗 -->
-<div id="finish-modal" class="modal">
+<div id="finish-modal" class="modal no-copy">
     <div class="modal-box">
         <h2 id="finish-status-title" style="color: var(--secondary);">試卷已完成提交</h2>
-        <p id="finish-msg" style="margin: 16px 0; font-size: 0.9rem; color: #555; line-height: 1.5;">
-            您的測驗成績已加密直傳至原廠資料庫。審核通過者將直接建檔並排程核發 L1 認證證書。
+        <div id="finish-score-badge" style="font-size: 2rem; font-weight: bold; margin: 12px 0; color: var(--primary);"></div>
+        <p id="finish-msg" style="margin: 14px 0; font-size: 0.9rem; color: #555; line-height: 1.5;">
+            您的測驗成績與基本資訊已加密回傳至原廠認證系統。通過考核者將直接建檔並核發 L1 認證證書。
         </p>
-        <p style="font-size: 0.8rem; color: #95a5a6;">請直接關閉此頁面即可。</p>
+        <p style="font-size: 0.8rem; color: #95a5a6;">為維護題庫安全，考生端不提供試題檢視，請直接關閉視窗。</p>
     </div>
 </div>
 
 <script>
-// ==========================================
-// 部署之 Google Apps Script Web App 網址
-// ==========================================
-const DISPATCH_API_URL = "https://script.google.com/macros/s/AKfycbyA72KTEs3uqbb0NuoxqmmFtn0PhqMRxjY6ypGZi-1mIV2JZCw6RQlG9FNW0mU8-f_9/exec";
+(function() {
+    // Google Apps Script Web App 部署網址
+    const DISPATCH_API_URL = "https://script.google.com/macros/s/AKfycbyA72KTEs3uqbb0NuoxqmmFtn0PhqMRxjY6ypGZi-1mIV2JZCw6RQlG9FNW0mU8-f_9/exec";
 
-// 原始題庫
-const rawQuestionBank = [
-    {
-        category: "系統架構",
-        q: "ST255CS-2H 儲能系統的電池模組（PACK）與變流器（PCS），分別主要採用哪一種散熱方式？",
-        correctText: "電池液冷、PCS 強制風冷",
-        wrongTexts: ["電池風冷、PCS 風冷", "電池液冷、PCS 液冷", "電池自然冷卻、PCS 水冷"]
-    },
-    {
-        category: "外部結構",
-        q: "檢視 ST255CS-2H 儲能櫃外觀，其變流器與電氣室的標準通風風道設計為何？",
-        correctText: "正面進風，背面出風",
-        wrongTexts: ["背面進風，正面出風", "底部進風，頂部出風", "左側進風，右側出風"]
-    },
-    {
-        category: "指示燈判讀",
-        q: "儲能櫃外觀頂部的狀態指示燈，若呈現「藍燈常亮」狀態，代表系統處於何種運作狀態？",
-        correctText: "系統正常工作（處於充放電運轉中）",
-        wrongTexts: ["系統有故障發生", "輔助電源完全斷開", "系統處於急停狀態"]
-    },
-    {
-        category: "指示燈判讀",
-        q: "儲能櫃頂部指示燈若呈現「2 秒週期性漸變閃爍（呼吸燈）」效果，代表何種狀態？",
-        correctText: "系統正常，待機未進行充放電",
-        wrongTexts: ["系統發生嚴重火警", "變流器韌體升級中", "櫃門未關緊或密封條破損"]
-    },
-    {
-        category: "系統架構",
-        q: "ST255CS-2H 儲能櫃內部由幾個電池模組（PACK）堆疊串聯組成單一電池簇（Rack）？",
-        correctText: "4 個",
-        wrongTexts: ["2 個", "6 個", "8 個"]
-    },
-    {
-        category: "電氣安全",
-        q: "當儲能櫃外部交流與直流電源完全斷開後，維運人員若需碰觸內部導電組件，至少應靜置多少時間？",
-        correctText: "至少 10～15 分鐘以上",
-        wrongTexts: ["1 分鐘", "3 分鐘", "無需等待即可立即碰觸"]
-    },
-    {
-        category: "作業安全",
-        q: "進行任何儲能櫃內部電氣配線或零組件維護作業前，第一步必須執行何種檢驗？",
-        correctText: "使用標準三用電表確實測量並驗證交直流側完全無電壓",
-        wrongTexts: ["使用紅外線測溫儀量測外殼", "使用感應驗電筆直接觸碰絕緣外皮", "以手背快速輕碰高壓銅排"]
-    },
-    {
-        category: "作業安全",
-        q: "現地遇上何種天氣環境時，現場「嚴禁」開啟儲能櫃門進行室外檢修與操作？",
-        correctText: "雷雨、大風、濃霧或相對濕度大於 95% 的潮濕天氣",
-        wrongTexts: ["晴天且氣溫 28℃", "微風多雲陰天", "氣溫 18℃ 的乾燥早晨"]
-    },
-    {
-        category: "應急處理",
-        q: "現場維運人員按下儲能櫃門正面的「緊急停機按鈕（急停）」後，下列敘述何者正確？",
-        correctText: "直流接觸器和交流主斷路器斷開，但內部輔助電源與控制電路板仍然帶電，嚴禁隨意觸碰",
-        wrongTexts: ["整台機櫃內部所有元件與電路板立刻完全不帶電", "氣溶膠滅火裝置會立即啟動噴灑", "系統將自動將電池殘餘電量於 5 分鐘內完全放空"]
-    },
-    {
-        category: "人員防護",
-        q: "進行儲能系統維護作業時，維運人員必須遵守的個人防護裝備（PPE）規範為何？",
-        correctText: "穿著絕緣鞋、配戴防護眼鏡與安全帽，並嚴禁配戴戒指、手錶等導電飾品",
-        wrongTexts: ["僅需穿著普通運動服與運動鞋", "必須配戴金屬手錶以利精準記錄時間", "可徒手進行高壓線纜插拔"]
-    },
-    {
-        category: "機械與電氣連接",
-        q: "連接電池模組（PACK）之間的直流高壓動力線航空插頭時，如何確認已正確插緊到位？",
-        correctText: "推入到底時會發出清脆的「咔噠」聲並確實鎖固到位",
-        wrongTexts: ["使用大力拉扯確認不會脫落即可", "塗抹大量黃油至完全溢出", "使用鐵鎚輕輕敲擊外殼"]
-    },
-    {
-        category: "機械與電氣連接",
-        q: "交流主電源配線若採用鋁合金線纜連接至銅端子排時，為避免電化學腐蝕，應採取何種措施？",
-        correctText: "嚴禁鋁端子直接接觸銅端子排，必須使用銅鋁過渡端子或銅鋁過渡墊片",
-        wrongTexts: ["直接將鋁裸端子以大扭力鎖在銅排上", "在鋁端子上纏繞絕緣膠帶後鎖緊", "將銅排鍍層磨除後直接連接"]
-    },
-    {
-        category: "機械與電氣連接",
-        q: "儲能櫃外部保護接地（PE）
+    // 每次抽取題數與總分設定
+    const QUESTIONS_PER_EXAM = 20;
+    const POINTS_PER_QUESTION = 5;
+    const PASSING_SCORE = 80;
+
+    // 50 題原廠查核標準題庫（依據 ST255CS-2H 用戶手冊與官方調試報告驗證）
+    const masterQuestionBank = [
+        // 【一、系統架構與產品基本參數：1~12】
+        {
+            category: "系統架構",
+            q: "ST255CS-2H 儲能系統的電池模組（PACK）與變流器（PCS），分別採用何種散熱方式？",
+            correctText: "電池採用液冷散熱、PCS 採用強制風冷散熱",
+            wrongTexts: ["電池採用強制風冷、PCS 採用液冷散熱", "兩者皆採用全風冷散熱", "兩者皆採用自然對流散熱"]
+        },
+        {
+            category: "產品型號",
+            q: "產品型號「ST255CS-2H」當中的「CS」與「2H」分別代表什麼意義？",
+            correctText: "CS 代表工商業場景，2H 代表系統初始設計運行小時數為 2 小時",
+            wrongTexts: ["CS 代表冷卻系統，2H 代表內建 2 台變流器", "CS 代表充電站專用，2H 代表保固 2 年", "CS 代表集中式儲能，2H 代表高壓雙迴路"]
+        },
+        {
+            category: "系統架構",
+            q: "ST255CS-2H 儲能櫃內部整合的變流器（PCS）標準型號與額定功率為何？",
+            correctText: "SC125CX，額定功率 125 kW",
+            wrongTexts: ["SG125CX-P2，額定功率 125 kW", "SC250HX，額定功率 250 kW", "SC100CX，額定功率 100 kW"]
+        },
+        {
+            category: "電池參數",
+            q: "ST255CS-2H 系統所採用的單體電芯化學材料、額定電壓與額定容量為何？",
+            correctText: "磷酸鐵鋰（LFP）、額定電壓 3.2V、額定容量 314Ah",
+            wrongTexts: ["三元鋰（NMC）、額定電壓 3.7V、額定容量 280Ah", "磷酸鐵鋰（LFP）、額定電壓 3.2V、額定容量 280Ah", "鈦酸鋰（LTO）、額定電壓 2.4V、額定容量 314Ah"]
+        },
+        {
+            category: "電池參數",
+            q: "ST255CS-2H 單一電池模組（PACK）內部的電芯串並聯組合方式與防護等級為何？",
+            correctText: "1P64S（64 顆電芯串聯），防護等級 IP65",
+            wrongTexts: ["2P32S（32 串 2 並），防護等級 IP54", "1P52S（52 顆電芯串聯），防護等級 IP65", "1P104S（104 顆電芯串聯），防護等級 IP55"]
+        },
+        {
+            category: "電池參數",
+            q: "ST255CS-2H 整櫃電池簇（Rack）是由幾個電池模組（PACK）堆疊串聯組成？總串聯數與額定總容量為何？",
+            correctText: "4 個 PACK 堆疊，系統配置 256S1P，額定容量 257 kWh",
+            wrongTexts: ["5 個 PACK 堆疊，系統配置 320S1P，額定容量 257 kWh", "4 個 PACK 堆疊，系統配置 128S2P，額定容量 200 kWh", "8 個 PACK 堆疊，系統配置 512S1P，額定容量 510 kWh"]
+        },
+        {
+            category: "電池參數",
+            q: "ST255CS-2H 電池簇（Rack）的額定電壓與直流輸出電壓範圍為何？",
+            correctText: "額定電壓 819.2V，直流電壓範圍 691.2V ～ 934.4V",
+            wrongTexts: ["額定電壓 768.0V，直流電壓範圍 600.0V ～ 900.0V", "額定電壓 1000V，直流電壓範圍 800.0V ～ 1500.0V", "額定電壓 400.0V，直流電壓範圍 323.0V ～ 418.0V"]
+        },
+        {
+            category: "系統架構",
+            q: "在 ST255CS-2H 的控制與通訊架構中，電池簇管理單元（CMU）與電池系統控制器（BSC）分別整合於何處？",
+            correctText: "LC 本地控制器整合了 BSC 功能，CMU 則內置於變流器（PCS）中",
+            wrongTexts: ["CMU 與 BSC 皆獨立安裝在機櫃頂部外殼", "CMU 內置於液冷機組，BSC 內置於電表箱", "BSC 內置於 PACK 1，CMU 內置於 UPS 中"]
+        },
+        {
+            category: "機械參數",
+            q: "ST255CS-2H 儲能櫃的整機重量與寬×高×深尺寸約為多少？",
+            correctText: "重量約 2900 kg（約 3 噸），尺寸 1150 × 2400 × 1610 mm",
+            wrongTexts: ["重量約 1200 kg，尺寸 800 × 2000 × 1000 mm", "重量約 5500 kg，尺寸 2200 × 2400 × 1610 mm", "重量約 500 kg，尺寸 600 × 1800 × 800 mm"]
+        },
+        {
+            category: "外部結構",
+            q: "ST255CS-2H 儲能櫃整體的通風風道設計方向為何？",
+            correctText: "正面進風，背面出風",
+            wrongTexts: ["背面進風，正面出風", "底部進風，頂部出風", "左側進風，右側出風"]
+        },
+        {
+            category: "外部結構",
+            q: "儲能櫃門開啟時，最大開門角度為何？",
+            correctText: "135°",
+            wrongTexts: ["90°", "180°", "60°"]
+        },
+        {
+            category: "系統參數",
+            q: "ST255CS-2H 電池艙的防護等級、工作環境溫度範圍與最高工作海拔分別為何？",
+            correctText: "防護等級 IP55、工作溫度 -30℃ ～ 50℃、最高海拔 3000 m",
+            wrongTexts: ["防護等級 IP20、工作溫度 0℃ ～ 40℃、最高海拔 1000 m", "防護等級 IP68、工作溫度 -40℃ ～ 70℃、最高海拔 5000 m", "防護等級 IP54、工作溫度 -10℃ ～ 35℃、最高海拔 2000 m"]
+        },
+
+        // 【二、指示燈與外觀組件判讀：13~17】
+        {
+            category: "指示燈判讀",
+            q: "儲能櫃頂部的 LED 狀態指示燈若呈現「藍燈常亮」，代表系統處於何種狀態？",
+            correctText: "系統正常工作（正在進行充放電運作）",
+            wrongTexts: ["系統發生嚴重故障", "系統正常但處於待機未充放電狀態", "輔助供電已完全斷開"]
+        },
+        {
+            category: "指示燈判讀",
+            q: "儲能櫃頂部的 LED 狀態指示燈若呈現「2 秒週期性漸變閃爍（呼吸燈）」，代表何種狀態？",
+            correctText: "系統正常，但目前未進行充放電（待機狀態）",
+            wrongTexts: ["系統正在執行消防氣溶膠釋放", "系統發生通訊中斷告警", "輔助電源已斷電"]
+        },
+        {
+            category: "指示燈判讀",
+            q: "儲能櫃頂部的 LED 狀態指示燈若完全「熄滅」，代表何種狀態？",
+            correctText: "輔助供電已斷開",
+            wrongTexts: ["系統充放電滿載運作中", "電池電量（SOC）已達 100%", "系統處於低功耗睡眠但輔助電源正常"]
+        },
+        {
+            category: "指示燈判讀",
+            q: "變流器（SC125CX）面板上的 LED 指示燈若呈現「藍色快閃（週期 0.2 秒）」，代表什麼意義？",
+            correctText: "藍牙已經連接且有數據通訊，同時設備沒有故障發生",
+            wrongTexts: ["變流器直流側發生短路故障", "變流器交流與直流側皆已斷電", "設備處於急停鎖定狀態"]
+        },
+        {
+            category: "內部佈局",
+            q: "ST255CS-2H 櫃內自上而下的主要設備堆疊順序為何？",
+            correctText: "最上方為變流器（PCS） → 液冷機組（LCS） → 4 個電池模組（PACK 1~4） → 最下方為配電盒（BSP）",
+            wrongTexts: ["最上方為配電盒（BSP） → 4 個電池模組 → 液冷機組 → 最下方為變流器（PCS）", "最上方為電池模組 → 變流器 → 液冷機組 → 配電盒", "最上方為液冷機組 → 配電盒 → 變流器 → 電池模組"]
+        },
+
+        // 【三、人員安全與防護規範：18~25】
+        {
+            category: "電氣安全",
+            q: "根據機體安全警告標識與手冊規範，設備與外部電源斷開後，至少需等待多久才可觸摸內部導電器件或開門進行維護？",
+            correctText: "至少等待 10 ～ 20 分鐘（標誌規定 15 分鐘、維護章節規定停機後至少 20 分鐘），並用三用電表確認無電壓",
+            wrongTexts: ["斷開開關後即可立即徒手觸摸", "僅需等待 30 秒即可操作", "無需斷電可直接帶電拆解電池模組"]
+        },
+        {
+            category: "作業安全",
+            q: "在進行任何儲能櫃內部電氣接線或檢修前，操作人員必須執行的首要安全確認步驟為何？",
+            correctText: "斷開所有交直流側開關，並使用標準三用電表（萬用表）測量確認端子完全無電壓",
+            wrongTexts: ["直接用驗電筆碰觸機殼外部烤漆", "觀察頂部指示燈閃爍即可直接觸摸銅排", "先將消防啟動線短路測試"]
+        },
+        {
+            category: "應急處理",
+            q: "當現場發生緊急情況按下櫃門正面的「緊急停機按鈕（急停）」後，櫃內帶電狀態為何？",
+            correctText: "直流接觸器和交流主斷路器會斷開，但內部輔助電源和 PCB 電路板仍然帶電，嚴禁隨意觸碰",
+            wrongTexts: ["整台儲能櫃所有電池電芯電壓瞬間歸零", "內部輔助電源、UPS 與所有電路板完全斷電", "液冷機組會立即加速運轉排風"]
+        },
+        {
+            category: "環境安全",
+            q: "遇到下列何種天氣或環境條件時，現場嚴禁開啟儲能櫃門進行電氣連接或維護作業？",
+            correctText: "雷電、雨雪、濃霧、六級及以上大風，或環境相對濕度大於 95% 時",
+            wrongTexts: ["晴朗無雲且相對濕度 50% 的午後", "環境溫度 22℃ 的陰天", "微風且乾燥的早晨"]
+        },
+        {
+            category: "人員防護",
+            q: "維運人員對儲能系統進行檢修或更換乙二醇冷卻液時，下列個人防護規範何者正確？",
+            correctText: "必須佩戴安全護目鏡、安全帽、絕緣鞋、絕緣手套，並嚴禁佩戴手錶或戒指等金屬飾品",
+            wrongTexts: ["為求操作靈活，應赤手操作並佩戴金屬手錶計時", "僅需穿著一般棉質T恤與涼鞋", "可雙手同時直接握持高壓正負極柱"]
+        },
+        {
+            category: "高空作業",
+            q: "根據手冊吊裝與運輸安全規定，凡在距離地面幾公尺及以上的高度進行作業，即界定為「高空作業」，必須設專人監護並佩戴安全帶？",
+            correctText: "2 公尺及以上",
+            wrongTexts: ["5 公尺及以上", "10 公尺及以上", "3.5 公尺及以上"]
+        },
+        {
+            category: "電池安全",
+            q: "關於電池單元的現場操作與維護權限，下列敘述何者正確？",
+            correctText: "電池單元內部沒有可供用戶自行維護的部件，僅有原廠認可的專業人員才可移除、更換或處理電池",
+            wrongTexts: ["現場維運人員可隨時拆開 PACK 外殼更換單顆電芯", "若單顆模組損壞，可將不同品牌或不同容量的電池混用串聯", "PACK A 與 PACK B 型號可以任意互相替換位置"]
+        },
+        {
+            category: "電池安全",
+            q: "在電池模組維護規範中，關於 PACK A 與 PACK B 兩種不同極柱出線方向的電池模組，下列規定何者正確？",
+            correctText: "PACK A 與 PACK B 嚴禁互相替換，且禁止不同類型的電池模組串聯或並聯使用",
+            wrongTexts: ["PACK A 與 PACK B 完全相同，可隨意對調安裝", "只要電壓相近，可與铅酸電池直接並聯", "可在電池附近吸菸或放置易燃物"]
+        },
+
+        // 【四、運輸、存儲與機械安裝：26~33】
+        {
+            category: "運輸與存儲",
+            q: "ST255CS-2H 在運輸過程中的傾斜角度限制，以及存儲地面的坡度要求分別為何？",
+            correctText: "運輸過程傾斜角度需 ≤ 15°；存儲地面水平度偏差 0～10mm 且坡度必須小於 5°",
+            wrongTexts: ["運輸可水平倒放（90°）；存儲地面坡度可達 30°", "運輸傾斜角度 ≤ 45°；存儲地面無任何限制", "可透過空運運輸，且存儲於積水草地"]
+        },
+        {
+            category: "運輸與存儲",
+            q: "關於儲能系統長期存儲的環境溫度與維護要求，下列敘述何者正確？",
+            correctText: "最佳存儲溫度為 -30℃ ～ +25℃；若存儲超過 6 個月需進行一次充放電使 SOC 達 30%～40%，且 UPS 不運行時每半年需充電一次",
+            wrongTexts: ["存儲期間應將所有櫃門完全打開通風，並撕掉進出風口貼膜", "存儲超過 2 年完全不需要補電或巡檢", "乾燥劑放入盛液槽後，在設備正式通電運轉時應繼續留在櫃內"]
+        },
+        {
+            category: "機械安裝",
+            q: "為防止雨水侵蝕儲能櫃底座及內部，建造水泥地基時建議地基高出安裝現場水平地面約多少高度？",
+            correctText: "約 300 mm",
+            wrongTexts: ["約 10 mm", "低於水平地面 200 mm", "約 2000 mm"]
+        },
+        {
+            category: "機械安裝",
+            q: "若將儲能櫃安裝在室內或出風風道有明顯障礙物時，系統長期穩定運行要求進風口處溫度不超過多少？背部出風口區域需滿足何種通風與製冷條件？",
+            correctText: "進風口溫度不超過 45℃；背部出風口區域需滿足通風量 ≥ 2500 m³/h、製冷量 ≥ 7 kW，且機櫃頂部通風高度 ≥ 800 mm",
+            wrongTexts: ["進風口溫度可達 65℃；無需任何通風量要求", "進風口溫度不超過 15℃；製冷量 ≥ 50 kW", "機櫃頂部可直接緊貼天花板（距離 0 mm）"]
+        },
+        {
+            category: "機械安裝",
+            q: "使用堆高機（叉車）透過儲能櫃底部專用叉孔進行移動時，堆高機的最小承載能力要求為何？",
+            correctText: "至少 5 噸（5t）",
+            wrongTexts: ["1 噸（1t）即可", "2 噸（2t）即可", "可將貨叉直接插入機櫃中間散熱百葉窗抬起"]
+        },
+        {
+            category: "吊裝作業",
+            q: "進行儲能櫃起吊作業時，當設備被吊離支撐面多少高度後應暫停，檢查吊具連接牢固且設備與水平面傾斜角小於幾度後方可繼續起吊？",
+            correctText: "吊離支撐面 300 mm 後暫停檢查，確認與水平面傾斜角度小於 5°",
+            wrongTexts: ["吊離支撐面 2000 mm 後暫停，傾斜角度小於 30°", "無需暫停直接快速吊至定位", "起吊時移動機器下方 10m 內可安排人員站立扶持底部"]
+        },
+        {
+            category: "機械安裝",
+            q: "儲能櫃出廠時貼在進風口、出風口與門鎖位置的 3M 保護貼膜，應在什麼時機移除？",
+            correctText: "儲能系統完成現場固定安裝後、正式上電運行前務必完全移除",
+            wrongTexts: ["出廠起吊前就必須撕除", "永遠保留在進風口上充當防塵濾網", "運行半年後才移除"]
+        },
+        {
+            category: "機械安裝",
+            q: "根據安裝環境要求，儲能系統嚴禁安裝在強振動或強電磁場環境中，手冊定義的強磁場環境是指磁場強度超過多少？",
+            correctText: "超過 30 A/m",
+            wrongTexts: ["超過 1 A/m", "超過 500 A/m", "超過 1000 A/m"]
+        },
+
+        // 【五、電氣接線、扭力與電池連接：34~40】
+        {
+            category: "電氣連接",
+            q: "儲能櫃外部保護接地（PE）採用 70～95 mm² 銅接地線纜連接時，使用的螺栓規格、緊固扭矩及接地電阻要求為何？",
+            correctText: "使用 M10 螺栓，緊固扭矩 34～40 N·m，接地電阻不得大於 4 Ω，接線後需做防腐處理",
+            wrongTexts: ["使用 M4 螺栓，緊固扭矩 2 N·m，接地電阻小於 100 Ω 即可", "使用 M16 螺栓，緊固扭矩 140 N·m，無需測量接地電阻", "直接將裸銅線纏繞在門把手上即可"]
+        },
+        {
+            category: "電氣連接",
+            q: "在配電盒交流輸出端子排（L1、L2、L3、N）進行主電源線纜連接時，應使用何種規格螺栓？配電盒面板端子最大支援線纜直徑為何？",
+            correctText: "使用 M12 螺栓，配電盒面板端子最大支援線纜直徑為 26 mm",
+            wrongTexts: ["使用 M6 螺栓，最大支援線纜直徑 10 mm", "使用 M3 螺栓，最大支援線纜直徑 50 mm", "無需螺栓，直接插入彈簧孔"]
+        },
+        {
+            category: "電氣連接",
+            q: "若主電源或輔助電源採用鋁合金線纜連接至銅端子排時，正確的連接方式為何？",
+            correctText: "嚴禁將鋁接線端子直接連到銅端子排（會造成電化學腐蝕），必須使用銅鋁過渡接線端子，或鋁端子配合銅鋁過渡墊片（銅面貼銅排、鋁面貼鋁端子）",
+            wrongTexts: ["直接將鋁端子鎖在銅端子排上即可", "在銅排與鋁端子之間夾入塑膠墊片絕緣", "將銅鋁過渡墊片的鋁面貼銅排、銅面貼鋁端子"]
+        },
+        {
+            category: "電氣連接",
+            q: "在進行櫃內佈線與線纜壓接時，動力線與通訊線的強弱電間距最小應保留多少？且螺栓緊固後外露絲扣（螺牙）應為多少？",
+            correctText: "強弱電間距最小保留 10 cm 以免電磁干擾；螺栓外露絲扣約 2～3 顆螺牙（約 3 mm），且熱縮套管不可被夾入接觸面",
+            wrongTexts: ["動力線與通訊線應緊密捆綁在一起；螺絲外露越長越好（超過 5 cm）", "應將熱縮套管夾入銅排與端子中間以增加摩擦力", "可在機櫃內部直接裁切剝線，讓金屬線屑留在櫃內"]
+        },
+        {
+            category: "施工防護",
+            q: "儲能櫃與外部設備的所有線纜統一從底部進出，接線完成後底部進出線孔必須執行何種操作？",
+            correctText: "必須使用防火泥（耐火泥）等防火/防水材料嚴密封堵縫隙，防止鼠類等囓齒動物或濕氣進入",
+            wrongTexts: ["保持敞開以利底部通風散熱", "塞入廢紙箱與保麗龍碎片即可", "僅需用一般透明膠帶貼住"]
+        },
+        {
+            category: "電池連接",
+            q: "現場進行電池模組（PACK）之間及 PACK 與 PCS 之間的直流動力線航空插頭連接時，下列操作規範何者正確？",
+            correctText: "正極為橙色、負極為黑色；連接前先確認斷開 PACK 與 PCS 間線纜，插入航空插頭時必須確認發出「咔噠」一聲鎖緊到位",
+            wrongTexts: ["正極為黑色、負極為橙色；可帶電直接插拔", "航空插頭只需輕放靠上，不需推到底發出咔噠聲", "熔斷器（Fuse）安裝在 PACK 1 與 PACK 2 之間"]
+        },
+        {
+            category: "電氣安全",
+            q: "當電池簇（Rack）迴路發生外部短路、配電盒（開關盒）內的熔斷器產生保護動作熔斷時，維運人員必須如何處理？",
+            correctText: "必須同時更換開關盒中的熔絲（熔斷器）與直流接觸器",
+            wrongTexts: ["僅需用銅線短接熔斷器即可繼續開機", "僅更換熔絲，直流接觸器無需檢查或更換", "將變流器短路故障直接忽略並強制合閘"]
+        },
+
+        // 【六、上電投運、下電停運與通訊配置：41~45】
+        {
+            category: "上電與停運",
+            q: "現場執行 ST255CS-2H 標準上電投運時，配電盒與軟體的正確開機順序為何？",
+            correctText: "確認上電前檢查無誤 → 閉合交流主開關 → 閉合交流輔助開關 → 閉合不間斷電源（UPS）開關 → 按下 UPS 開機按鈕 → 在 LC/EMS 軟體頁面開機",
+            wrongTexts: ["先在軟體頁面點選開機 → 再按 UPS 開機按鈕 → 最後閉合交流主開關", "直接按下櫃門急停按鈕即可自動完成上電", "在低於 -40℃ 環境下直接強制滿載放電開機"]
+        },
+        {
+            category: "上電與停運",
+            q: "執行「計劃性下電停運」時，正確的操作步驟順序為何？",
+            correctText: "先透過 LC/EMS 軟體控制系統停機並斷開電池繼電器 → 按下 UPS 關機按鈕 → 斷開 UPS 開關 → 斷開交流輔助開關 → 斷開交流主開關",
+            wrongTexts: ["在系統滿載充放電工作時，直接拉下交流與直流側開關", "先直接斷開交流主開關，完全不需透過軟體停機", "僅斷開直流開關即可直接觸摸交流輸入端子"]
+        },
+        {
+            category: "通訊配置",
+            q: "ST255CS-2H 內部本地控制器（LC300）的 ETH1 與 ETH2 網口預設 IP 位址分別為何？",
+            correctText: "LC-ETH1 預設為 192.168.1.100；LC-ETH2 預設為 192.168.13.100",
+            wrongTexts: ["LC-ETH1 預設為 10.0.0.1；LC-ETH2 預設為 192.168.0.1", "兩者皆為 255.255.255.0", "LC-ETH1 預設為 192.168.1.200；LC-ETH2 預設為 13.13.13.13"]
+        },
+        {
+            category: "通訊配置",
+            q: "當現場配置 EMS300CP 能量管理系統時，其預設 IP 位址、多機並聯手拉手組網上限，以及為實現防逆流/需量控制/過載保護需提前安裝的三個電表為何？",
+            correctText: "EMS 預設 IP 為 192.168.1.200（ETH2）/ 192.168.13.200（ETH1）；最多支援 20 機並聯；需安裝關口電表、過載監視電表、計量電表",
+            wrongTexts: ["EMS 預設採 DHCP 動態浮動 IP；最多支援 100 機並聯；不需安裝任何電表", "EMS 預設 IP 為 192.168.1.100；僅支援 2 機並聯", "與北向控制器連接時，無需在 Web 軟體修改調度方式"]
+        },
+        {
+            category: "軟硬體調試",
+            q: "根據現場調試規範，工程師使用筆電首次登入 LC300 與 EMS300CP 網頁介面時，預設的登入帳號與密碼分別為何？",
+            correctText: "LC300 帳號為 administrator（預設密碼 developer@LC3000 或 developer@LC300）；EMS300CP 維運帳號為 maintain（預設密碼 pw1111）",
+            wrongTexts: ["兩者帳號皆為 root，密碼皆為 123456", "LC300 帳號為 guest 無密碼；EMS300CP 帳號為 admin 密碼 0000", "必須插入硬體加密狗才可開啟登入畫面"]
+        },
+
+        // 【七、消防系統與例行維護（SOC 校準與箱體修補）：46~50】
+        {
+            category: "消防系統",
+            q: "ST255CS-2H 電池艙內的「複合型探測器」可偵測哪些環境參數？其發出火災報警訊號 A1 的觸發條件為何？",
+            correctText: "可探測溫度、CO 濃度和煙霧濃度；A1 觸發條件為 CO 濃度達 2000 ppm 且煙霧濃度達 100 mg/m³，並持續 10 秒",
+            wrongTexts: ["僅探測濕度；當相對濕度達 80% 持續 1 秒即觸發 A1", "可探測氧氣濃度；當溫度達 35℃ 即觸發氣溶膠噴灑", "複合型探測器維護週期為 10 年，且可用水直接沖洗"]
+        },
+        {
+            category: "消防系統",
+            q: "櫃內「熱氣溶膠滅火裝置」與選配「水消防備用系統（洒水噴頭）」的自動啟動溫度閾值分別為何？",
+            correctText: "熱氣溶膠滅火裝置於電池艙內溫度達 180℃（±20℃）時釋放；備用水消防洒水噴頭玻璃球於周圍溫度達 68℃ 時破裂灑水（須在斷電後啟用供水）",
+            wrongTexts: ["氣溶膠於 50℃ 釋放；洒水噴頭於 200℃ 破裂", "兩者皆於 100℃ 同時釋放，且可在帶電狀態下直接灌水浸沒電池", "消防系統報警後會自動遠端復位，無需消防專業人員到場排查"]
+        },
+        {
+            category: "電池維護",
+            q: "關於電池低電量與欠壓保護規範，發生下列哪一種情況所導致的容量損失將「不在原廠保固範圍內」？",
+            correctText: "電芯放電電壓連續 120 小時低於 2.7V、任意電池簇 SOC 連續 120 小時為 0%，或電芯放電電壓低於 2.0V（觸發欠壓/過壓故障時務必在 24 小時內聯繫原廠）",
+            wrongTexts: ["系統開啟原廠預設的「主動補電」功能自動小電流充電", "系統長時間（7 天以上）不運行時，將 SOC 下限保護值提高到 10% 以上", "單體電芯電壓維持在 3.2V ～ 3.3V 之間"]
+        },
+        {
+            category: "電池維護",
+            q: "當儲能系統在「維護或關機期間」或「運行期間」發現任意電池簇 SOC 降為 0% 時，必須分別在多久時間內完成補電？",
+            correctText: "維護或關機期間需在 120 小時內將 SOC 充電至 15% 及以上；運行期間需在 2 小時內將 SOC 充電至 5% 及以上（或轉為補電模式）",
+            wrongTexts: ["無論關機或運行期間，皆可放置 30 天後再充電至 1%", "關機期間需在 1 小時內充至 100%；運行期間不需補電", "建議直接關閉系統預設的「主動補電」功能以節省廠內用電"]
+        },
+        {
+            category: "例行維護",
+            q: "維運人員執行「手動 SOC 校準」以及「機櫃外觀防鏽檢查與除塵」時，下列標準程序何者正確？",
+            correctText: "手動 SOC 校準需先放寬保護上下限，放電至下限（1~5%）靜置 1 小時，再充電至上限（97~100%）靜置 1 小時；清潔風道前必須切斷電源並用吸塵器清理（嚴禁用水沖洗），且每年檢查防護漆、每 5 年整體重塗",
+            wrongTexts: ["SOC 校準只需充放電至 50% 且無需靜置；機櫃內部風道可直接用高壓水柱沖洗", "抽取最頂層 PACK 1 維護時，無需拆除附近的複合型探測器可直接強行拉出", "當複合型探測器維護清除灰塵後，煙霧濃度大於 50 mg/m³ 為合格"]
+        }
+    ];
+
+    let currentExamQuestions = [];
+    let userSelections = {};
+    let candidateInfo = {};
+    let timerInterval = null;
+    let remainingSeconds = 40 * 60;
+    let tabSwitchCount = 0;
+    const MAX_TAB_SWITCH = 3;
+    let isExamActive = false;
+    let isExamSubmitted = false;
+    let lastBlurTimestamp = 0;
+
+    // Fisher-Yates 隨機洗牌演算法
+    function shuffleArray(array) {
+        const arr = array.slice();
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+        return arr;
+    }
+
+    // 綁定開始測驗按鈕與提交按鈕（DOM 載入完成後執行）
+    function bindEvents() {
+        const startBtn = document.getElementById("btn-start-exam");
+        const submitBtn = document.getElementById("btn-submit-exam");
+
+        if (startBtn) {
+            startBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                startSecureExam();
+            });
+        }
+
+        if (submitBtn) {
+            submitBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                confirmSubmit();
+            });
+        }
+
+        // 支援在輸入框按 Enter 鍵觸發開始
+        const inputs = document.querySelectorAll("#candidate-modal input");
+        inputs.forEach(function(input) {
+            input.addEventListener("keydown", function(e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    startSecureExam();
+                }
+            });
+        });
+    }
+
+    function startSecureExam() {
+        const nameInput = document.getElementById("cand-name");
+        const compInput = document.getElementById("cand-company");
+        const titleInput = document.getElementById("cand-title");
+        const phoneInput = document.getElementById("cand-phone");
+        const emailInput = document.getElementById("cand-email");
+        const errBox = document.getElementById("form-error");
+
+        const name = nameInput ? nameInput.value.trim() : "";
+        const comp = compInput ? compInput.value.trim() : "";
+        const title = titleInput ? titleInput.value.trim() : "";
+        const phone = phoneInput ? phoneInput.value.trim() : "";
+        const email = emailInput ? emailInput.value.trim() : "";
+
+        if (!name || !comp || !title || !phone || !email) {
+            if (errBox) errBox.style.display = "block";
+            return;
+        }
+
+        if (errBox) errBox.style.display = "none";
+
+        // 收合行動端鍵盤
+        if (document.activeElement && typeof document.activeElement.blur === "function") {
+            document.activeElement.blur();
+        }
+
+        candidateInfo = { name: name, comp: comp, title: title, phone: phone, email: email };
+        document.getElementById("display-name").innerText = name;
+        document.getElementById("display-comp").innerText = comp + " · " + title;
+
+        // 切換顯示狀態
+        document.getElementById("candidate-modal").style.display = "none";
+        document.getElementById("exam-main-wrapper").style.display = "flex";
+
+        // 從 50 題題庫隨機抽取 20 題，並將每題選項隨機洗牌
+        const selectedPool = shuffleArray(masterQuestionBank).slice(0, QUESTIONS_PER_EXAM);
+        currentExamQuestions = selectedPool.map(function(qItem, idx) {
+            const allOptions = [
+                { text: qItem.correctText, isCorrect: true },
+                { text: qItem.wrongTexts[0], isCorrect: false },
+                { text: qItem.wrongTexts[1], isCorrect: false },
+                { text: qItem.wrongTexts[2], isCorrect: false }
+            ];
+            return {
+                index: idx,
+                category: qItem.category,
+                question: qItem.q,
+                options: shuffleArray(allOptions)
+            };
+        });
+
+        renderQuizUI();
+        isExamActive = true;
+        startExamTimer();
+        initAntiCheatEngine();
+        window.scrollTo(0, 0);
+    }
+
+    function renderQuizUI() {
+        const container = document.getElementById("quiz-container");
+        const gridNav = document.getElementById("grid-nav");
+        container.innerHTML = "";
+        gridNav.innerHTML = "";
+
+        currentExamQuestions.forEach(function(item, qIdx) {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.id = "card-" + qIdx;
+
+            const headerDiv = document.createElement("div");
+            headerDiv.className = "card-header";
+            headerDiv.innerHTML = "<span>第 " + (qIdx + 1) + " 題 / 共 " + QUESTIONS_PER_EXAM + " 題</span><span>分類：" + item.category + "</span>";
+
+            const qTextDiv = document.createElement("div");
+            qTextDiv.className = "question-text";
+            qTextDiv.innerText = item.question;
+
+            const optsGroup = document.createElement("div");
+            optsGroup.className = "options-group";
+
+            item.options.forEach(function(opt, optIdx) {
+                const label = document.createElement("label");
+                label.className = "option-label";
+                label.id = "lbl-" + qIdx + "-" + optIdx;
+
+                const radio = document.createElement("input");
+                radio.type = "radio";
+                radio.name = "opt_" + qIdx;
+                radio.value = optIdx;
+
+                radio.addEventListener("change", function() {
+                    selectAnswer(qIdx, optIdx);
+                });
+
+                const span = document.createElement("span");
+                span.innerText = String.fromCharCode(65 + optIdx) + ". " + opt.text;
+
+                label.appendChild(radio);
+                label.appendChild(span);
+                optsGroup.appendChild(label);
+            });
+
+            card.appendChild(headerDiv);
+            card.appendChild(qTextDiv);
+            card.appendChild(optsGroup);
+            container.appendChild(card);
+
+            const navBtn = document.createElement("button");
+            navBtn.type = "button";
+            navBtn.className = "nav-btn";
+            navBtn.id = "nav-" + qIdx;
+            navBtn.innerText = qIdx + 1;
+            navBtn.addEventListener("click", function() {
+                const targetCard = document.getElementById("card-" + qIdx);
+                if (targetCard) {
+                    targetCard.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+            });
+            gridNav.appendChild(navBtn);
+        });
+    }
+
+    function selectAnswer(qIdx, optIdx) {
+        userSelections[qIdx] = optIdx;
+
+        const navBtn = document.getElementById("nav-" + qIdx);
+        if (navBtn) navBtn.classList.add("answered");
+
+        const card = document.getElementById("card-" + qIdx);
+        if (card) {
+            card.classList.add("active");
+            const allLabels = card.querySelectorAll(".option-label");
+            allLabels.forEach(function(l) {
+                l.classList.remove("selected");
+            });
+        }
+
+        const activeLabel = document.getElementById("lbl-" + qIdx + "-" + optIdx);
+        if (activeLabel) activeLabel.classList.add("selected");
+    }
+
+    function startExamTimer() {
+        timerInterval = setInterval(function() {
+            if (remainingSeconds <= 0) {
+                clearInterval(timerInterval);
+                finalizeAndDispatch("時間到強制交卷");
+                return;
+            }
+            remainingSeconds--;
+            const m = Math.floor(remainingSeconds / 60);
+            const s = remainingSeconds % 60;
+            const mStr = m < 10 ? "0" + m : "" + m;
+            const sStr = s < 10 ? "0" + s : "" + s;
+            document.getElementById("time-display").innerText = mStr + ":" + sStr;
+        }, 1000);
+    }
+
+    function initAntiCheatEngine() {
+        // 禁止考題區右鍵選單與複製
+        document.addEventListener("contextmenu", function(e) {
+            if (isExamActive) e.preventDefault();
+        });
+        document.addEventListener("copy", function(e) {
+            if (isExamActive) e.preventDefault();
+        });
+
+        // 統一透過 Page Visibility API 偵測分頁切換或縮小（全平台穩定相容）
+        document.addEventListener("visibilitychange", function() {
+            if (!isExamActive || isExamSubmitted) return;
+            if (document.visibilityState === "hidden") {
+                const now = Date.now();
+                if (now - lastBlurTimestamp > 1000) {
+                    lastBlurTimestamp = now;
+                    triggerCheatWarning();
+                }
+            }
+        });
+
+        // 攔截桌面端 F12 與開發者工具快捷鍵
+        window.addEventListener("keydown", function(e) {
+            if (!isExamActive) return;
+            if (
+                e.key === "F12" ||
+                (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "C" || e.key === "J")) ||
+                (e.ctrlKey && (e.key === "u" || e.key === "U"))
+            ) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+
+    function triggerCheatWarning() {
+        if (isExamSubmitted) return;
+
+        tabSwitchCount++;
+        const warnBadge = document.getElementById("warn-display");
+        if (warnBadge) {
+            warnBadge.style.display = "inline-block";
+            warnBadge.innerText = "離開畫面：" + tabSwitchCount + " / " + MAX_TAB_SWITCH;
+        }
+
+        if (tabSwitchCount >= MAX_TAB_SWITCH) {
+            document.getElementById("lock-screen").style.display = "flex";
+            finalizeAndDispatch("違規離開考試視窗達上限 (作弊強制終止)");
+        }
+    }
+
+    function confirmSubmit() {
+        const answeredCount = Object.keys(userSelections).length;
+
+        if (answeredCount < QUESTIONS_PER_EXAM) {
+            const unans = QUESTIONS_PER_EXAM - answeredCount;
+            if (!window.confirm("您尚有 " + unans + " 題未作答，確定要現在交卷嗎？提交後無法修改。")) {
+                return;
+            }
+        } else {
+            if (!window.confirm("確定要提交試卷並上傳成績嗎？")) {
+                return;
+            }
+        }
+
+        finalizeAndDispatch("正常交卷");
+    }
+
+    function finalizeAndDispatch(submitType) {
+        if (isExamSubmitted) return;
+        isExamSubmitted = true;
+        isExamActive = false;
+        clearInterval(timerInterval);
+
+        let score = 0;
+        currentExamQuestions.forEach(function(item, qIdx) {
+            const selectedOptIdx = userSelections[qIdx];
+            if (selectedOptIdx !== undefined && item.options[selectedOptIdx] && item.options[selectedOptIdx].isCorrect) {
+                score += POINTS_PER_QUESTION;
+            }
+        });
+
+        const isPassed = score >= PASSING_SCORE;
+        const payload = {
+            timestamp: new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" }),
+            name: candidateInfo.name,
+            company: candidateInfo.comp,
+            title: candidateInfo.title,
+            phone: candidateInfo.phone,
+            email: candidateInfo.email,
+            score: score,
+            result: isPassed ? "及格 (通過L1認證)" : "未達標準 (不合格)",
+            cheatWarnings: tabSwitchCount,
+            submitType: submitType
+        };
+
+        // 自動非同步傳送至 Google Apps Script
+        if (DISPATCH_API_URL) {
+            fetch(DISPATCH_API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload)
+            }).catch(function(err) {
+                console.error("Dispatch Error:", err);
+            });
+        }
+
+        const finishModal = document.getElementById("finish-modal");
+        const titleEl = document.getElementById("finish-status-title");
+        const scoreEl = document.getElementById("finish-score-badge");
+
+        if (scoreEl) {
+            scoreEl.innerText = "測驗得分：" + score + " 分";
+            scoreEl.style.color = isPassed ? "var(--success)" : "var(--danger)";
+        }
+
+        if (titleEl) {
+            if (isPassed) {
+                titleEl.innerText = "🎉 測驗通過 (符合 L1 認證資格)";
+                titleEl.style.color = "var(--success)";
+            } else {
+                titleEl.innerText = "測驗完成 (未達 80 分及格標準)";
+                titleEl.style.color = "var(--danger)";
+            }
+        }
+
+        if (finishModal) finishModal.style.display = "flex";
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bindEvents);
+    } else {
+        bindEvents();
+    }
+})();
+</script>
+
+</body>
+</html>
