@@ -33,7 +33,7 @@
             background-color: var(--bg);
             color: var(--text);
             line-height: 1.6;
-            padding-bottom: 60px;
+            padding-bottom: 70px;
         }
 
         header {
@@ -206,9 +206,9 @@
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 12px;
+            padding: 14px;
             border-radius: 6px;
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: bold;
             cursor: pointer;
             transition: background 0.2s;
@@ -233,10 +233,10 @@
 
         .form-group input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid var(--border);
             border-radius: 5px;
-            font-size: 0.95rem;
+            font-size: 1rem;
             user-select: text;
             -webkit-user-select: text;
         }
@@ -253,6 +253,7 @@
             align-items: center;
             z-index: 1000;
             padding: 16px;
+            overflow-y: auto;
         }
 
         .modal-box {
@@ -263,8 +264,7 @@
             width: 100%;
             text-align: center;
             box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-            max-height: 90vh;
-            overflow-y: auto;
+            margin: auto;
         }
 
         #lock-screen {
@@ -310,7 +310,7 @@
 </head>
 <body>
 
-<!-- 鎖定螢幕 -->
+<!-- 違規鎖定畫面 -->
 <div id="lock-screen">
     <h1 style="font-size: 2rem; margin-bottom: 15px;">⚠️ 測驗已被強制終止</h1>
     <p style="font-size: 1.05rem; max-width: 500px; margin-bottom: 20px; line-height: 1.5;">
@@ -336,7 +336,7 @@
     <div class="modal-box">
         <h3 style="color: var(--secondary); margin-bottom: 6px;">考生認證資料登錄</h3>
         <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 16px;">
-            本測驗受防作弊保護。測驗期間**嚴禁切換分頁或開啟其他應用程式**，切換達 3 次將自動強制交卷。
+            本測驗受防作弊保護。測驗期間**嚴禁切換分頁或離開瀏覽器**，離開累計達 3 次將自動強制交卷。
         </p>
         
         <div class="form-group">
@@ -345,7 +345,7 @@
         </div>
         <div class="form-group">
             <label>公司 / 所屬單位名稱 <span style="color:red;">*</span></label>
-            <input type="text" id="cand-company" placeholder="例如：友達光電 / 泓德能源 / 維運服務商" required>
+            <input type="text" id="cand-company" placeholder="例如：友達光電 / 泓德能源 / 維運協力商" required>
         </div>
         <div class="form-group">
             <label>部門 / 職稱 <span style="color:red;">*</span></label>
@@ -356,11 +356,11 @@
             <input type="tel" id="cand-phone" placeholder="09xxxxxxxx" required>
         </div>
         <div class="form-group">
-            <label>電子信箱 (證書核發寄送) <span style="color:red;">*</span></label>
+            <label>電子信箱 (證書核發通知) <span style="color:red;">*</span></label>
             <input type="email" id="cand-email" placeholder="name@company.com" required>
         </div>
         
-        <button class="btn" style="margin-top: 6px;" onclick="startSecureExam()">確認資料並開始測驗</button>
+        <button type="button" class="btn" style="margin-top: 10px;" id="start-btn" onclick="startSecureExam()">確認資料並開始測驗</button>
     </div>
 </div>
 
@@ -377,7 +377,7 @@
         </div>
         <h4 style="font-size: 0.9rem;">試題導航</h4>
         <div class="grid-nav" id="grid-nav"></div>
-        <button class="btn" onclick="confirmSubmit()">繳交試卷並送出成績</button>
+        <button type="button" class="btn" onclick="confirmSubmit()">繳交試卷並送出成績</button>
     </aside>
 </div>
 
@@ -464,4 +464,14 @@ const rawQuestionBank = [
         category: "機械與電氣連接",
         q: "連接電池模組（PACK）之間的直流高壓動力線航空插頭時，如何確認已正確插緊到位？",
         correctText: "推入到底時會發出清脆的「咔噠」聲並確實鎖固到位",
-        wrongTexts: ["使用大力拉扯確認不會脫落即可", "塗抹大量黃油至完全溢出", "使用鐵
+        wrongTexts: ["使用大力拉扯確認不會脫落即可", "塗抹大量黃油至完全溢出", "使用鐵鎚輕輕敲擊外殼"]
+    },
+    {
+        category: "機械與電氣連接",
+        q: "交流主電源配線若採用鋁合金線纜連接至銅端子排時，為避免電化學腐蝕，應採取何種措施？",
+        correctText: "嚴禁鋁端子直接接觸銅端子排，必須使用銅鋁過渡端子或銅鋁過渡墊片",
+        wrongTexts: ["直接將鋁裸端子以大扭力鎖在銅排上", "在鋁端子上纏繞絕緣膠帶後鎖緊", "將銅排鍍層磨除後直接連接"]
+    },
+    {
+        category: "機械與電氣連接",
+        q: "儲能櫃外部保護接地（PE）
