@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ST255CS-2H 儲能系統 L1 技術人員認證考核系統</title>
+    <style>
+        :root {
+            --primary: #f15a24;
+            --primary-dark: #d04312;
+            --secondary: #1f4e78;
+            --bg: #f4f7f9;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --border: #dcdfe6;
+            --danger: #e74c3c;
+            --success: #27ae60;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none; /* 禁止反白防複製 */
+            font-family: "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        header {
+            background-color: var(--secondary);
+            color: #ffffff;
+            padding: 16px 0;
+            border-bottom: 4px solid var(--primary);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            background-color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .warning-badge {
+            background-color: var(--danger);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-left: 10px;
+            display: none;
+        }
+
+        .main-container {
+            max-width: 1100px;
+            margin: 25px auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;
+        }
+
+        .exam-area {
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 290px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 90px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--border);
+        }
+
+        .card.active {
+            border-left-color: var(--primary);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #fbfcfd;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background: #f0f4f8;
+        }
+
+        .option-label input {
+            margin-right: 12px;
+            accent-color: var(--primary);
+        }
+
+        .grid-nav {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .nav-btn {
+            background: #eef2f5;
+            border: 1px solid var(--border);
+            padding: 8px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .nav-btn.answered {
+            background: #e1f0fa;
+            color: #2980b9;
+            border-color: #3498db;
+        }
+
+        .btn {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+
+        /* 模態彈窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        }
+
+        #lock-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #e74c3c;
+            color: white;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
+
+<!-- 作弊鎖定警告螢幕 -->
+<div id="lock-screen">
+    <h1 style="font-size: 2.5rem; margin-bottom: 15px;">⚠️ 測驗已被強制終止</h1>
+    <p style="font-size: 1.2rem; max-width: 600px; margin-bottom: 25px;">
+        系統偵測到您切換分頁或離開測驗視窗次數已達上限（3 次）。為維持認證公平性，試卷已自動封鎖並提交現有作答紀錄，本次成績將記錄違規。
+    </p>
+</div>
+
+<header>
+    <div class="header-content">
+        <div>
+            <h2>ST255CS-2H 儲能系統 L1 原廠認證測驗</h2>
+            <p style="font-size: 0.8rem; color: #bdc3c7;">防作弊受控環境 ｜ 80 分及格 ｜ 成績自動直傳原廠系統</p>
+        </div>
+        <div style="display: flex; align-items: center;">
+            <div class="status-badge">剩餘時間：<span id="time-display">40:00</span></div>
+            <div class="warning-badge" id="warn-display">切屏警告：0 / 3</div>
+        </div>
+    </div>
+</header>
+
+<!-- 考生資料登錄彈窗 -->
+<div id="candidate-modal" class="modal" style="display: flex;">
+    <div class="modal-box">
+        <h3 style="color: var(--secondary); margin-bottom: 8px;">考生身分核對登錄</h3>
+        <p style="font-size: 0.85rem; color: #7f8c8d; margin-bottom: 20px;">
+            本測驗受防作弊協定保護。測驗期間**嚴禁切換分頁、離開視窗或開啟開發者工具**，違者將自動終止並計為不及格。
+        </p>
+        
+        <div class="form-group">
+            <label>中文姓名 <span style="color:red;">*</span></label>
+            <input type="text" id="cand-name" placeholder="請輸入中文全名" required>
+        </div>
+        <div class="form-group">
+            <label>所屬事業單位 / 公司 <span style="color:red;">*</span></label>
+            <input type="text" id="cand-company" placeholder="例如：友達光電 / 泓德能源 / 維運協力商" required>
+        </div>
+        <div class="form-group">
+            <label>部門 / 職稱 <span style="color:red;">*</span></label>
+            <input type="text" id="cand-title" placeholder="例如：電氣技術員 / 現場維運工程師" required>
+        </div>
+        <div class="form-group">
+            <label>手機聯絡電話 <span style="color:red;">*</span></label>
+            <input type="tel" id="cand-phone" placeholder="09xxxxxxxx" required>
+        </div>
+        <div class="form-group">
+            <label>電子信箱 (證書核發通知) <span style="color:red;">*</span></label>
+            <input type="email" id="cand-email" placeholder="name@company.com" required>
+        </div>
+        
+        <button class="btn" onclick="startSecureExam()">同意防作弊規範並進入全螢幕測驗</button>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="exam-area" id="quiz-container">
+        <!-- 亂序生成考題 -->
+    </div>
+
+    <aside class="sidebar">
+        <div style="margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            <div style="font-size: 0.8rem; color: #7f8c8d;">應試工程師</div>
+            <strong id="display-name" style="font-size: 1.05rem; color: var(--secondary);">-</strong>
+            <div id="display-comp" style="font-size: 0.8rem; color: #95a5a6;">-</div>
+        </div>
+        <h4>題號導航</h4>
+        <div class="grid-nav" id="grid-nav"></div>
+        <button class="btn" onclick="confirmSubmit()">完成並傳送評分結果</button>
+    </aside>
+</div>
+
+<!-- 提交完成提示彈窗 -->
+<div id="finish-modal" class="modal">
+    <div class="modal-box">
+        <h2 id="finish-status-title" style="color: var(--secondary);">試卷已成功上傳</h2>
+        <p id="finish-msg" style="margin: 20px 0; font-size: 0.95rem; color: #555;">
+            您的考核成果與基本資訊已加密回傳至原廠核發系統。考核通過名單將直接建檔於認證資料庫並進行證書核發作業。
+        </p>
+        <p style="font-size: 0.85rem; color: #95a5a6;">為維護原廠題庫安全，考生端不提供考題答案檢視，請關閉本頁面即可。</p>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// 核心設定：請貼入您的 Google Web App 部署網址
+// ==========================================
+const DISPATCH_API_URL = "https://script.google.com/macros/s/AKfycbyA72KTEs3uqbb0NuoxqmmFtn0PhqMRxjY6ypGZi-1mIV2JZCw6RQlG9FNW0mU8-f_9/exec";
+
+// 原始題庫（內部標準題庫，不直接暴露正解代碼給考生）
+const rawQuestionBank = [
+    {
+        category: "系統架構",
+        q: "ST255CS-2H 儲能系統的電池模組（PACK）與變流器（PCS），分別主要採用哪一種散熱方式？",
+        correctText: "電池液冷、PCS 強制風冷",
+        wrongTexts: ["電池風冷、PCS 風冷", "電池液冷、PCS 液冷", "電池自然冷卻、PCS 水冷"]
+    },
+    {
+        category: "外部結構",
+        q: "檢視 ST255CS-2H 儲能櫃外觀，其變流器與電氣室的標準通風風道設計為何？",
+        correctText: "正面進風，背面出風",
+        wrongTexts: ["背面進風，正面出風", "底部進風，頂部出風", "左側進風，右側出風"]
+    },
+    {
+        category: "指示燈判讀",
+        q: "儲能櫃外觀頂部的狀態指示燈，若呈現「藍燈常亮」狀態，代表系統處於何種運作狀態？",
+        correctText: "系統正常工作（處於充放電運轉中）",
+        wrongTexts: ["系統有故障發生", "輔助電源完全斷開", "系統處於急停狀態"]
+    },
+    {
+        category: "指示燈判讀",
+        q: "儲能櫃頂部指示燈若呈現「2 秒週期性漸變閃爍（呼吸燈）」效果，代表何種狀態？",
+        correctText: "系統正常，待機未進行充放電",
+        wrongTexts: ["系統發生嚴重火警", "變流器韌體升級中", "櫃門未關緊或密封條破損"]
+    },
+    {
+        category: "系統架構",
+        q: "ST255CS-2H 儲能櫃內部由幾個電池模組（PACK）堆疊串聯組成單一電池簇（Rack）？",
+        correctText: "4 個",
+        wrongTexts: ["2 個", "6 個", "8 個"]
+    },
+    {
+        category: "電氣安全",
+        q: "當儲能櫃外部交流與直流電源完全斷開後，維運人員若需碰觸內部導電組件，至少應靜置多少時間？",
+        correctText: "至少 10～15 分鐘以上",
+        wrongTexts: ["1 分鐘", "3 分鐘", "無需等待即可立即碰觸"]
+    },
+    {
+        category: "作業安全",
+        q: "進行任何儲能櫃內部電氣配線或零組件維護作業前，第一步必須執行何種檢驗？",
+        correctText: "使用標準三用電表確實測量並驗證交直流側完全無電壓",
+        wrongTexts: ["使用紅外線測溫儀量測外殼", "使用感應驗電筆直接觸碰絕緣外皮", "以手背快速輕碰高壓銅排"]
+    },
+    {
+        category: "作業安全",
+        q: "現地遇上何種天氣環境時，現場「嚴禁」開啟儲能櫃門進行室外檢修與操作？",
+        correctText: "雷雨、大風、濃霧或相對濕度大於 95% 的潮濕天氣",
+        wrongTexts: ["晴天且氣溫 28℃", "微風多雲陰天", "氣溫 18℃ 的乾燥早晨"]
+    },
+    {
+        category: "應急處理",
+        q: "現場維運人員按下儲能櫃門正面的「緊急停機按鈕（急停）」後，下列敘述何者正確？",
+        correctText: "直流接觸器和交流主斷路器斷開，但內部輔助電源與控制電路板仍然帶電，嚴禁隨意觸碰",
+        wrongTexts: ["整台機櫃內部所有元件與電路板立刻完全不帶電", "氣溶膠滅火裝置會立即啟動噴灑", "系統將自動將電池殘餘電量於 5 分鐘內完全放空"]
+    },
+    {
+        category: "人員防護",
+        q: "進行儲能系統維護作業時，維運人員必須遵守的個人防護裝備（PPE）規範為何？",
+        correctText: "穿著絕緣鞋、配戴防護眼鏡與安全帽，並嚴禁配戴戒指、手錶等導電飾品",
+        wrongTexts: ["僅需穿著普通運動服與運動鞋", "必須配戴金屬手錶以利精準記錄時間", "可徒手進行高壓線纜插拔"]
+    },
+    {
+        category: "機械與電氣連接",
+        q: "連接電池模組（PACK）之間的直流高壓動力線航空插頭時，如何確認已正確插緊到位？",
+        correctText: "推入到底時會發出清脆的「咔噠」聲並確實鎖固到位",
+        wrongTexts: ["使用大力拉扯確認不會脫落即可", "塗抹大量黃油至完全溢出", "使用鐵鎚輕輕敲擊外殼"]
+    },
+    {
+        category: "機械與電氣連接",
+        q: "交流主電源配線若採用鋁合金線纜連接至銅端子排時，為避免電化學腐蝕，應採取何種措施？",
+        correctText: "嚴禁鋁端子直接接觸銅端子排，必須使用銅鋁過渡端子或銅鋁過渡墊片",
+        wrongTexts: ["直接將鋁裸端子以大扭力鎖在銅排上", "在鋁端子上纏繞絕緣膠帶後鎖緊", "將銅排鍍層磨除後直接連接"]
+    },
+    {
+        category: "機械與電氣連接",
+        q: "儲能櫃外部保護接地（PE）端子使用螺栓緊固後，為防止接地點日後氧化生鏽，應採取何種防護？",
+        correctText: "對接地點整體表面進行防腐防鏽處理（如噴塗專用防腐漆）",
+        wrongTexts: ["浸泡於清水中冷卻", "每天使用砂紙重新打磨", "接地為自然金屬，無需任何後續處置"]
+    },
+    {
+        category: "施工防護",
+        q: "儲能櫃底部完成全部線纜配線後，為防止鼠類進入咬壞線路並阻隔濕氣，穿線孔應使用何種材料封堵？",
+        correctText: "防火泥（耐火泥）或專用密封膠材料確實嚴密封堵",
+        wrongTexts: ["一般廢棄紙箱碎屑", "普通塑膠袋塞入", "報紙團"]
+    },
+    {
+        category: "施工驗收",
+        q: "儲能櫃出廠時貼於進風口、出風口與門鎖上的 3M 保護貼膜，應於何時將其全部撕除？",
+        correctText: "設備於現地完成固定安裝後、正式通電運轉前務必完全移除",
+        wrongTexts: ["在工廠裝卸上車時立刻撕除", "永遠保留貼膜以防止外部灰塵進入", "商業運轉三年後例行保養時再撕除"]
+    },
+    {
+        category: "上電作業",
+        q: "現地進行標準通電開機作業時，配電盒（BSP）內部的硬體開關切換順序何者正確？",
+        correctText: "先閉合交流主開關（QF1） → 閉合交流輔助開關（Q1）與 UPS 開關（Q2） → 啟動 UPS → 軟體開機",
+        wrongTexts: ["先關閉 UPS → 閉合 QF1 → 軟體開機", "直接按下急停按鈕開機", "拔除全部控制線纜後直接合閘"]
+    },
+    {
+        category: "通訊配置",
+        q: "使用筆記型電腦透過乙太網路線直連本地控制器（LC300）進行設定時，LC300 預設的登入 IP 位址通常為何？",
+        correctText: "192.168.13.100（或 192.168.1.100）",
+        wrongTexts: ["10.0.0.1", "192.168.1.1", "255.255.255.0"]
+    },
+    {
+        category: "運維保養",
+        q: "儲能系統於案場長期停機維護期間，若發現任意電池簇電量（SOC）降為 0%，維運人員應如何處理？",
+        correctText: "必須在 120 小時內將 SOC 充電補電至 15% 以上，防止電芯因深度過放造成不可逆損壞",
+        wrongTexts: ["放任不管，等待數個月後再觀察", "立即向電池艙直接注水冷卻", "立即將全櫃電池模組判定報廢更換"]
+    },
+    {
+        category: "安全防護",
+        q: "ST255CS-2H 櫃內配置的火災探測系統中，「複合型探測器」主要負責連續監控櫃內的哪些物理參數？",
+        correctText: "溫度、一氧化碳（CO）濃度與煙霧濃度",
+        wrongTexts: ["僅監測風速與風向", "僅監測交流電壓大小", "僅監測地基震動頻率"]
+    },
+    {
+        category: "例行保養",
+        q: "清潔儲能櫃內部灰塵與散熱風道濾網時，下列哪一種做法是正確且符合安全規範的？",
+        correctText: "切斷電源並驗電確認後，使用工業吸塵器或乾燥柔軟抹布清理，嚴禁用水沖洗內部電氣零組件",
+        wrongTexts: ["使用高壓水槍直接沖洗機櫃內部與電氣元件", "運轉帶電中直接以濕布擦拭高壓母排", "使用強酸或高腐蝕性清潔劑刷洗電路板"]
+    }
+];
+
+let randomizedExam = [];
+let userSelections = {};
+let candidateInfo = {};
+let timerInterval = null;
+let remainingSeconds = 40 * 60;
+let tabSwitchCount = 0;
+const MAX_TAB_SWITCH = 3;
+let isExamSubmitted = false;
+
+// 防作弊隨機洗牌演算法
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function startSecureExam() {
+    const name = document.getElementById("cand-name").value.trim();
+    const comp = document.getElementById("cand-company").value.trim();
+    const title = document.getElementById("cand-title").value.trim();
+    const phone = document.getElementById("cand-phone").value.trim();
+    const email = document.getElementById("cand-email").value.trim();
+
+    if (!name || !comp || !title || !phone || !email) {
+        alert("所有考生欄位皆為必填，請確實填寫以利原廠核發證書！");
+        return;
+    }
+
+    candidateInfo = { name, comp, title, phone, email };
+    document.getElementById("display-name").innerText = name;
+    document.getElementById("display-comp").innerText = `${comp} · ${title}`;
+    document.getElementById("candidate-modal").style.display = "none";
+
+    // 啟動全螢幕防護
+    if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+    }
+
+    // 隨機重排題目與選項（Shuffle Engine）
+    const shuffledQuestions = shuffleArray(rawQuestionBank);
+    randomizedExam = shuffledQuestions.map((qItem, idx) => {
+        const allOptions = [
+            { text: qItem.correctText, isCorrect: true },
+            ...qItem.wrongTexts.map(t => ({ text: t, isCorrect: false }))
+        ];
+        const shuffledOptions = shuffleArray(allOptions);
+        return {
+            index: idx,
+            category: qItem.category,
+            question: qItem.q,
+            options: shuffledOptions
+        };
+    });
+
+    renderQuizUI();
+    startExamTimer();
+    initAntiCheatListeners();
+}
+
+function renderQuizUI() {
+    const container = document.getElementById("quiz-container");
+    const gridNav = document.getElementById("grid-nav");
+    container.innerHTML = "";
+    gridNav.innerHTML = "";
+
+    randomizedExam.forEach((item, qIdx) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.id = `card-${qIdx}`;
+
+        let optsHtml = "";
+        item.options.forEach((opt, optIdx) => {
+            optsHtml += `
+                <label class="option-label" onclick="selectAnswer(${qIdx}, ${optIdx})">
+                    <input type="radio" name="opt_${qIdx}" value="${optIdx}">
+                    <span>${String.fromCharCode(65 + optIdx)}. ${opt.text}</span>
+                </label>
+            `;
+        });
+
+        card.innerHTML = `
+            <div class="card-header">
+                <span>第 ${qIdx + 1} 題 / 共 20 題</span>
+                <span>核心分類：${item.category}</span>
+            </div>
+            <div class="question-text">${item.question}</div>
+            <div class="options-group">${optsHtml}</div>
+        `;
+        container.appendChild(card);
+
+        const navBtn = document.createElement("button");
+        navBtn.className = "nav-btn";
+        navBtn.id = `nav-${qIdx}`;
+        navBtn.innerText = qIdx + 1;
+        navBtn.onclick = () => {
+            document.getElementById(`card-${qIdx}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+        gridNav.appendChild(navBtn);
+    });
+}
+
+function selectAnswer(qIdx, optIdx) {
+    userSelections[qIdx] = optIdx;
+    document.getElementById(`nav-${qIdx}`).classList.add("answered");
+    document.getElementById(`card-${qIdx}`).classList.add("active");
+}
+
+function startExamTimer() {
+    timerInterval = setInterval(() => {
+        if (remainingSeconds <= 0) {
+            clearInterval(timerInterval);
+            finalizeAndDispatch("時間到強制交卷");
+            return;
+        }
+        remainingSeconds--;
+        const m = Math.floor(remainingSeconds / 60);
+        const s = remainingSeconds % 60;
+        document.getElementById("time-display").innerText = 
+            `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+
+// 防作弊偵測機制
+function initAntiCheatListeners() {
+    // 偵測跳離分頁或視窗失去焦點
+    window.addEventListener("blur", handleTabSwitch);
+
+    // 禁用關鍵快捷鍵 (F12, Ctrl+Shift+I, Ctrl+U)
+    window.addEventListener("keydown", (e) => {
+        if (
+            e.key === "F12" ||
+            (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "C" || e.key === "J")) ||
+            (e.ctrlKey && e.key === "u")
+        ) {
+            e.preventDefault();
+            return false;
+        }
+    });
+}
+
+function handleTabSwitch() {
+    if (isExamSubmitted) return;
+
+    tabSwitchCount++;
+    const warnBadge = document.getElementById("warn-display");
+    warnBadge.style.display = "inline-block";
+    warnBadge.innerText = `切屏警告：${tabSwitchCount} / ${MAX_TAB_SWITCH}`;
+
+    if (tabSwitchCount >= MAX_TAB_SWITCH) {
+        document.getElementById("lock-screen").style.display = "flex";
+        finalizeAndDispatch("違規切換視窗超標 (作弊終止)");
+    } else {
+        alert(`【防作弊警告】偵測到您離開考試畫面！累計違規 ${tabSwitchCount} 次，超過 ${MAX_TAB_SWITCH} 次將強制終止考試並取消資格！`);
+    }
+}
+
+function confirmSubmit() {
+    const total = randomizedExam.length;
+    const answered = Object.keys(userSelections).length;
+
+    if (answered < total) {
+        if (!confirm(`您尚有 ${total - answered} 題未作答，確定要現在提交嗎？提交後將無法修改。`)) {
+            return;
+        }
+    } else {
+        if (!confirm("確定要交卷並傳送成績嗎？")) {
+            return;
+        }
+    }
+
+    finalizeAndDispatch("正常提交");
+}
+
+function finalizeAndDispatch(submitType) {
+    if (isExamSubmitted) return;
+    isExamSubmitted = true;
+    clearInterval(timerInterval);
+    window.removeEventListener("blur", handleTabSwitch);
+
+    // 評分計算（各題對應被隨機重排後的選項屬性）
+    let score = 0;
+    randomizedExam.forEach((item, qIdx) => {
+        const selectedOptIdx = userSelections[qIdx];
+        if (selectedOptIdx !== undefined && item.options[selectedOptIdx].isCorrect) {
+            score += 5;
+        }
+    });
+
+    const isPassed = score >= 80;
+    const payload = {
+        timestamp: new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" }),
+        name: candidateInfo.name,
+        company: candidateInfo.comp,
+        title: candidateInfo.title,
+        phone: candidateInfo.phone,
+        email: candidateInfo.email,
+        score: score,
+        result: isPassed ? "及格 (通過L1認證)" : "未達標準 (不合格)",
+        cheatWarnings: tabSwitchCount,
+        submitType: submitType
+    };
+
+    // 自動非同步傳送至您的 Google Apps Script 後端
+    if (DISPATCH_API_URL && !DISPATCH_API_URL.includes("YOUR-DEPLOYED-URL-HERE")) {
+        fetch(DISPATCH_API_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        }).catch(err => console.error("Dispatch Error:", err));
+    }
+
+    // 顯示最終防作弊完成畫面（不顯示正解，杜絕洩題）
+    document.getElementById("finish-modal").style.display = "flex";
+    if (!isPassed) {
+        document.getElementById("finish-status-title").innerText = "測驗已完成 (未達及格標準)";
+        document.getElementById("finish-status-title").style.color = "var(--danger)";
+    }
+}
+</script>
+
+</body>
+</html>
